@@ -1,0 +1,70 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+enum SalaryType {
+  DAILY
+  MONTHLY
+}
+
+enum PaymentMethod {
+  CASH
+  BANK
+}
+
+enum EmploymentStage {
+  PROBATIONARY
+  REGULAR
+}
+
+model EmployeeProfile {
+  id                      String            @id @default(cuid())
+  fullName                String
+  dateStarted             DateTime
+  salaryType              SalaryType
+  dailyRate               Decimal?
+  monthlyRate             Decimal?
+  employmentStage         EmploymentStage   @default(PROBATIONARY)
+  probationaryDeductionPct Decimal         @default(0)
+  paymentMethod           PaymentMethod     @default(BANK)
+  regionCode              String            @default("NCR")
+  createdAt               DateTime          @default(now())
+  updatedAt               DateTime          @updatedAt
+  payrollSnapshots        PayrollSnapshot[]
+}
+
+model PayrollSnapshot {
+  id                    String          @id @default(cuid())
+  employeeId            String
+  periodStart           DateTime
+  periodEnd             DateTime
+  workingDays           Int
+  baselineDays          Int             @default(23)
+  regularPay            Decimal
+  ahopTopup             Decimal
+  grossWithAhop         Decimal
+  sssEmployee           Decimal
+  philHealthEmployee    Decimal
+  pagIbigEmployee       Decimal
+  probationaryDeduction Decimal
+  netPay                Decimal
+  createdAt             DateTime        @default(now())
+
+  employee EmployeeProfile @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+}
+
+model ContributionRateConfig {
+  id                   String   @id @default(cuid())
+  name                 String   @default("Handbook v1")
+  philHealthRate       Decimal  @default(2.5)
+  pagIbigEmployeeFixed Decimal  @default(200)
+  pagIbigEmployerFixed Decimal  @default(200)
+  effectiveFrom        DateTime
+  effectiveTo          DateTime?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+}
