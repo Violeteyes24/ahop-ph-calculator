@@ -367,6 +367,15 @@ export default function Home() {
               Notes: Pay schedule follows handbook windows: 26th-10th paid on 15th, 11th-25th paid on last day of month.
               Payment method is cash or direct bank only.
             </p>
+            <div className="mt-4 flex justify-end">
+              <button
+                type="button"
+                onClick={() => window.print()}
+                className="print-exclude rounded-lg border border-[#2f4f3e] bg-[#2f4f3e] px-4 py-2 text-sm font-semibold text-white hover:bg-[#274636]"
+              >
+                Preview Payslip
+              </button>
+            </div>
           </CardContent>
         </Card>
 
@@ -508,13 +517,6 @@ export default function Home() {
                   Generated {generatedOn}
                 </CardDescription>
               </div>
-              <button
-                type="button"
-                onClick={() => window.print()}
-                className="print-exclude rounded-lg border border-[#2f4f3e] bg-[#2f4f3e] px-4 py-2 text-sm font-semibold text-white hover:bg-[#274636]"
-              >
-                Print Payslip
-              </button>
             </div>
           </CardHeader>
           <CardContent className="pt-5">
