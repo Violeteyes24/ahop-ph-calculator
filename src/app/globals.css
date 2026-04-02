@@ -206,11 +206,61 @@ body {
   padding: 0.7rem;
 }
 
+.payslip-sheet {
+  border: 1px solid #cfc8bb;
+  box-shadow: 0 14px 30px -24px rgba(36, 47, 39, 0.45);
+}
+
+.payslip-print-area {
+  animation: enterUp 560ms ease-out both;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .enter-up,
   .stagger-children > *,
+  .payslip-print-area,
   .tutorial-modal {
     animation: none;
+  }
+}
+
+@media print {
+  @page {
+    margin: 12mm;
+    size: A4 portrait;
+  }
+
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+    min-height: auto;
+  }
+
+  .print-exclude {
+    display: none !important;
+  }
+
+  .print-main {
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+
+  .payslip-print-area {
+    width: 100%;
+    margin: 0;
+    animation: none;
+  }
+
+  .payslip-sheet {
+    border: 1px solid #000000;
+    box-shadow: none;
+    background: #ffffff;
+  }
+
+  .caption {
+    color: #444444 !important;
   }
 }
 

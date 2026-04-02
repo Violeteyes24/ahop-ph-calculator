@@ -110,10 +110,13 @@ export function calculatePayroll(input: PayrollInputs): PayrollResult {
   const safeBaselineDays = Math.max(1, Math.floor(input.baselineDays || 23));
   const safeProbationPct = Math.max(0, input.probationaryDeductionPct || 0);
 
+  const inferredMonthlyRateFromDaily = round2(safeDailyRate * safeBaselineDays);
+  const effectiveMonthlyRate = safeMonthlyRate > 0 ? safeMonthlyRate : inferredMonthlyRateFromDaily;
+
   const regularPay =
     input.salaryType === "DAILY"
       ? round2(safeDailyRate * safeWorkingDays)
-      : round2(safeMonthlyRate);
+      : round2(effectiveMonthlyRate);
 
   const ahopDays = input.salaryType === "DAILY" ? Math.max(0, safeBaselineDays - safeWorkingDays) : 0;
   const ahopTopup = input.salaryType === "DAILY" ? round2(ahopDays * safeDailyRate) : 0;
@@ -133,12 +136,12 @@ export function calculatePayroll(input: PayrollInputs): PayrollResult {
   const annualRegularProjection =
     input.salaryType === "DAILY"
       ? round2(safeDailyRate * V1_ANNUAL_BASELINE_DAYS)
-      : round2(safeMonthlyRate * 12);
+      : round2(effectiveMonthlyRate * 12);
 
   const annualWithAhopProjection =
     input.salaryType === "DAILY"
       ? round2(safeDailyRate * safeBaselineDays * 12)
-      : round2(safeMonthlyRate * 12);
+      : round2(effectiveMonthlyRate * 12);
 
   return {
     regularPay,
