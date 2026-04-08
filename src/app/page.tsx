@@ -47,6 +47,14 @@ interface GlossaryTerm {
   icon: IconKind;
 }
 
+interface FormulaSlide {
+  id: string;
+  title: string;
+  formula: string;
+  explanation: string;
+  exampleLines: string[];
+}
+
 function TutorialIcon({ kind }: { kind: IconKind }) {
   if (kind === "profile") {
     return (
@@ -130,6 +138,8 @@ export default function Home() {
   const [baselineDays, setBaselineDays] = useState(23);
   const [probationaryDeductionPct, setProbationaryDeductionPct] = useState(0);
   const [isTutorialOpen, setIsTutorialOpen] = useState(false);
+  const [isFormulaTutorialOpen, setIsFormulaTutorialOpen] = useState(false);
+  const [formulaStepIndex, setFormulaStepIndex] = useState(0);
 
   const result = useMemo(
     () =>
@@ -154,13 +164,13 @@ export default function Home() {
     {
       id: "step-2",
       title: "Enter pay inputs",
-      description: "Input daily/monthly rate, working days, and baseline days based on your handbook.",
+      description: "Input daily or monthly rate, working days, and baseline days based on your handbook.",
       icon: "inputs",
     },
     {
       id: "step-3",
       title: "Review your breakdown",
-      description: "Check regular pay, AHOP top-up, deductions, and net pay. This is your easy summary of what you earn.",
+      description: "Check regular pay, AHOP top-up, deductions, and net pay in one summary.",
       icon: "review",
     },
   ];
@@ -188,27 +198,6 @@ export default function Home() {
     },
   ];
 
-  useEffect(() => {
-    if (!isTutorialOpen) {
-      return;
-    }
-
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setIsTutorialOpen(false);
-      }
-    };
-
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    window.addEventListener("keydown", onKeyDown);
-
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      window.removeEventListener("keydown", onKeyDown);
-    };
-  }, [isTutorialOpen]);
-
   const ahopDays = salaryType === "DAILY" ? Math.max(0, baselineDays - workingDays) : 0;
   const totalEmployeeDeductions =
     result.sssEmployee + result.philHealthEmployee + result.pagIbigEmployee + result.probationaryDeduction;
@@ -225,6 +214,96 @@ export default function Home() {
     day: "numeric",
   }).format(new Date());
 
+  const sampleFormulaResult = calculatePayroll({
+    salaryType: "DAILY",
+    dailyRate: 500,
+    monthlyRate: 11000,
+    workingDays: 22,
+    baselineDays: 23,
+    probationaryDeductionPct: 0,
+  });
+
+  const formulaSlides: FormulaSlide[] = [
+    {
+      id: "formula-1",
+      title: "Regular pay (no AHOP)",
+      formula: "Regular Pay = Daily Rate x Working Days",
+      explanation: "This is your normal pay before AHOP adds anything.",
+      exampleLines: [
+        `If daily rate is ${toPeso(500)} and working days are 22:`,
+        `${toPeso(500)} x 22 = ${toPeso(11000)}`,
+      ],
+    },
+    {
+      id: "formula-2",
+      title: "AHOP add-on",
+      formula: "AHOP Top-up = (Baseline Days - Working Days) x Daily Rate",
+      explanation: "AHOP fills the gap when you worked fewer days than baseline.",
+      exampleLines: [
+        "Baseline is 23 days and you worked 22 days, so the gap is 1 day.",
+        `AHOP = 1 x ${toPeso(500)} = ${toPeso(500)}`,
+      ],
+    },
+    {
+      id: "formula-3",
+      title: "Pay with AHOP",
+      formula: "Gross With AHOP = Regular Pay + AHOP Top-up",
+      explanation: "After adding AHOP, this is the gross amount before deductions.",
+      exampleLines: [
+        `${toPeso(11000)} + ${toPeso(500)} = ${toPeso(11500)}`,
+        `So with AHOP, pay goes from ${toPeso(11000)} to ${toPeso(11500)}.`,
+      ],
+    },
+    {
+      id: "formula-4",
+      title: "Take-home pay",
+      formula: "Net Pay = Gross With AHOP - (SSS EE + PhilHealth EE + Pag-IBIG EE + Probationary Deduction)",
+      explanation: "Take-home pay is what is left after required deductions.",
+      exampleLines: [
+        `Sample deductions: SSS ${toPeso(sampleFormulaResult.sssEmployee)}, PhilHealth ${toPeso(sampleFormulaResult.philHealthEmployee)}, Pag-IBIG ${toPeso(sampleFormulaResult.pagIbigEmployee)}.`,
+        `${toPeso(sampleFormulaResult.grossWithAhop)} - (${toPeso(sampleFormulaResult.sssEmployee)} + ${toPeso(sampleFormulaResult.philHealthEmployee)} + ${toPeso(sampleFormulaResult.pagIbigEmployee)} + ${toPeso(sampleFormulaResult.probationaryDeduction)}) = ${toPeso(sampleFormulaResult.netPay)}`,
+      ],
+    },
+  ];
+
+  const activeFormulaSlide = formulaSlides[formulaStepIndex];
+
+  useEffect(() => {
+    if (!isTutorialOpen && !isFormulaTutorialOpen) {
+      return;
+    }
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsTutorialOpen(false);
+        setIsFormulaTutorialOpen(false);
+        return;
+      }
+
+      if (isFormulaTutorialOpen && event.key === "ArrowRight") {
+        setFormulaStepIndex((previous) => Math.min(previous + 1, formulaSlides.length - 1));
+      }
+
+      if (isFormulaTutorialOpen && event.key === "ArrowLeft") {
+        setFormulaStepIndex((previous) => Math.max(previous - 1, 0));
+      }
+    };
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", onKeyDown);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [isTutorialOpen, isFormulaTutorialOpen, formulaSlides.length]);
+
+  function openFormulaTutorial(): void {
+    setFormulaStepIndex(0);
+    setIsFormulaTutorialOpen(true);
+  }
+
   function applyHandbookSample(): void {
     setFullName("Juan Dela Cruz");
     setDateStarted("2026-01-01");
@@ -235,6 +314,7 @@ export default function Home() {
     setBaselineDays(23);
     setProbationaryDeductionPct(0);
     setIsTutorialOpen(false);
+    setIsFormulaTutorialOpen(false);
   }
 
   return (
@@ -267,6 +347,13 @@ export default function Home() {
             className="rounded-xl border border-[#c9c2b7] bg-white px-4 py-2 text-sm font-medium hover:bg-[#f7f4ef]"
           >
             Try handbook sample
+          </button>
+          <button
+            type="button"
+            onClick={openFormulaTutorial}
+            className="rounded-xl border border-[#2f4f3e] bg-[#edf3ee] px-4 py-2 text-sm font-semibold text-[#254235] hover:bg-[#e3ede5]"
+          >
+            Formula Walkthrough
           </button>
         </div>
       </section>
@@ -637,6 +724,92 @@ export default function Home() {
           </section>
         </div>
       ) : null}
+
+      {isFormulaTutorialOpen ? (
+        <div className="print-exclude tutorial-overlay" role="presentation" onClick={() => setIsFormulaTutorialOpen(false)}>
+          <section
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="formula-tutorial-title"
+            className="tutorial-modal formula-tutorial-modal"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <header className="flex items-start justify-between gap-4">
+              <div>
+                <p className="caption text-xs uppercase tracking-[0.14em]">Formula Walkthrough</p>
+                <h2 id="formula-tutorial-title" className="mt-1 text-xl font-semibold">Step-by-step AHOP calculator tutorial</h2>
+                <p className="caption mt-1 text-sm">Example uses daily rate {toPeso(500)}, working days 22, baseline days 23.</p>
+              </div>
+              <button
+                type="button"
+                aria-label="Close formula tutorial"
+                onClick={() => setIsFormulaTutorialOpen(false)}
+                className="rounded-md border border-[#d7d0c4] px-2 py-1 text-sm hover:bg-[#f6f2ea]"
+              >
+                X
+              </button>
+            </header>
+
+            <div className="mt-4 rounded-lg border border-[#ddd5c8] bg-[#fbf8f2] px-3 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-[#4e5d52]">
+              Step {formulaStepIndex + 1} of {formulaSlides.length}
+            </div>
+
+            <article className="formula-slide mt-4">
+              <h3 className="text-base font-semibold">{activeFormulaSlide.title}</h3>
+              <p className="caption mt-2 text-sm">{activeFormulaSlide.explanation}</p>
+
+              <div className="formula-equation mt-3 rounded-xl p-3">
+                <p className="font-mono text-sm">{activeFormulaSlide.formula}</p>
+              </div>
+
+              <div className="formula-example mt-3 rounded-xl p-3 text-sm">
+                {activeFormulaSlide.exampleLines.map((line) => (
+                  <p key={line} className="leading-6">{line}</p>
+                ))}
+              </div>
+            </article>
+
+            <footer className="mt-6 flex flex-wrap items-center justify-between gap-2">
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setFormulaStepIndex((previous) => Math.max(previous - 1, 0))}
+                  disabled={formulaStepIndex === 0}
+                  className="rounded-xl border border-[#c9c2b7] bg-white px-3 py-2 text-sm font-medium hover:bg-[#f7f4ef] disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  ← Previous
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFormulaStepIndex((previous) => Math.min(previous + 1, formulaSlides.length - 1))}
+                  disabled={formulaStepIndex === formulaSlides.length - 1}
+                  className="rounded-xl border border-[#c9c2b7] bg-white px-3 py-2 text-sm font-medium hover:bg-[#f7f4ef] disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  Next →
+                </button>
+              </div>
+
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={applyHandbookSample}
+                  className="quick-tutorial-button inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold"
+                >
+                  Try sample now
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsFormulaTutorialOpen(false)}
+                  className="rounded-xl border border-[#c9c2b7] bg-white px-3 py-2 text-sm font-medium hover:bg-[#f7f4ef]"
+                >
+                  Close
+                </button>
+              </div>
+            </footer>
+          </section>
+        </div>
+      ) : null}
+
     </main>
   );
 }

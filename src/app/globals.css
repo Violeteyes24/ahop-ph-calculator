@@ -171,6 +171,27 @@ body {
   animation: enterUp 260ms ease-out both;
 }
 
+.formula-tutorial-modal {
+  width: min(860px, 100%);
+}
+
+.formula-slide {
+  border: 1px solid #dfd8cb;
+  border-radius: 0.9rem;
+  background: #fff;
+  padding: 0.85rem;
+}
+
+.formula-equation {
+  border: 1px solid #d7d0c2;
+  background: #f3eee3;
+}
+
+.formula-example {
+  border: 1px solid #d8d2c6;
+  background: #f8f4eb;
+}
+
 .tutorial-step {
   display: grid;
   grid-template-columns: auto 1fr;
