@@ -1,0 +1,18 @@
+PAYROLL RECONCILIATION REPORT
+==============================
+Period: Unknown to Unknown
+
+SUMMARY
+Total Employees: 1
+Matched Employees: 0
+Employees with Differences: 1
+Total Differences Found: 3
+
+DIFFERENCES
+-------------------------------------------
+
+Sample
+  MAJOR DIFFERENCES:
+    basicPay: Excel=5000.00, Calculated=40000.00, Diff=35000.00 (700.00%)
+    ahop: Excel=750.00, Calculated=0.00, Diff=-750.00 (-100.00%)
+    grossIncome: Excel=5125.00, Calculated=40125.00, Diff=35000.00 (682.93%)

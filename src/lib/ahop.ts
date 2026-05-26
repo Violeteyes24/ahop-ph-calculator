@@ -7,12 +7,26 @@ export interface PayrollInputs {
   workingDays: number;
   baselineDays: number;
   probationaryDeductionPct: number;
+  overtimeRegularHours?: number;
+  overtimeExtendedHours?: number;
+  silDays?: number;
+  slHours?: number;
+  absenceHours?: number;
+  tardinessDeduction?: number;
+  loanDeductions?: number;
+  salaryAdjustments?: number;
+  previousYtdAhop?: number;
 }
 
 export interface PayrollResult {
   regularPay: number;
   ahopTopup: number;
   grossWithAhop: number;
+  overtimeRegularPay: number;
+  overtimeExtendedPay: number;
+  silPay: number;
+  slPay: number;
+  absencePay: number;
   sssEmployee: number;
   sssEmployer: number;
   philHealthEmployee: number;
@@ -20,7 +34,11 @@ export interface PayrollResult {
   pagIbigEmployee: number;
   pagIbigEmployer: number;
   probationaryDeduction: number;
+  tardinessDeduction: number;
+  loanDeductions: number;
+  salaryAdjustments: number;
   netPay: number;
+  ytdAhop: number;
   annualRegularProjection: number;
   annualWithAhopProjection: number;
 }
@@ -110,6 +128,16 @@ export function calculatePayroll(input: PayrollInputs): PayrollResult {
   const safeBaselineDays = Math.max(1, Math.floor(input.baselineDays || 23));
   const safeProbationPct = Math.max(0, input.probationaryDeductionPct || 0);
 
+  const safeOTRegularHours = Math.max(0, input.overtimeRegularHours || 0);
+  const safeOTExtendedHours = Math.max(0, input.overtimeExtendedHours || 0);
+  const safeSilDays = Math.max(0, input.silDays || 0);
+  const safeSlHours = Math.max(0, input.slHours || 0);
+  const safeAbsenceHours = Math.max(0, input.absenceHours || 0);
+  const safeTardinessDeduction = Math.max(0, input.tardinessDeduction || 0);
+  const safeLoanDeductions = Math.max(0, input.loanDeductions || 0);
+  const safeSalaryAdjustments = input.salaryAdjustments || 0;
+  const safePreviousYtdAhop = Math.max(0, input.previousYtdAhop || 0);
+
   const inferredMonthlyRateFromDaily = round2(safeDailyRate * safeBaselineDays);
   const effectiveMonthlyRate = safeMonthlyRate > 0 ? safeMonthlyRate : inferredMonthlyRateFromDaily;
 
@@ -118,9 +146,27 @@ export function calculatePayroll(input: PayrollInputs): PayrollResult {
       ? round2(safeDailyRate * safeWorkingDays)
       : round2(effectiveMonthlyRate);
 
+  // AHOP calculation (only for DAILY salary type)
   const ahopDays = input.salaryType === "DAILY" ? Math.max(0, safeBaselineDays - safeWorkingDays) : 0;
   const ahopTopup = input.salaryType === "DAILY" ? round2(ahopDays * safeDailyRate) : 0;
-  const grossWithAhop = round2(regularPay + ahopTopup);
+
+  // Overtime calculations (1x and 1.3x rates)
+  const hourlyRate = round2(safeDailyRate / 8);
+  const overtimeRegularPay = round2(safeOTRegularHours * hourlyRate);
+  const overtimeExtendedPay = round2(safeOTExtendedHours * hourlyRate * 1.3);
+
+  // Leave calculations
+  const silPay = round2(safeSilDays * safeDailyRate);
+  const slPay = round2(safeSlHours * hourlyRate);
+  const absencePay = round2(safeAbsenceHours * hourlyRate);
+
+  // Total gross (base + OT + leaves)
+  const grossWithAhop = round2(
+    regularPay + ahopTopup + overtimeRegularPay + overtimeExtendedPay + silPay + slPay - absencePay
+  );
+
+  // YTD AHOP tracking
+  const ytdAhop = round2(safePreviousYtdAhop + ahopTopup);
 
   const sss = getSss(grossWithAhop);
   const philHealthEmployee = round2(grossWithAhop * PHILHEALTH_RATE);
@@ -129,9 +175,14 @@ export function calculatePayroll(input: PayrollInputs): PayrollResult {
   const probationaryDeduction = round2(grossWithAhop * (safeProbationPct / 100));
 
   const employeeTotalDeductions =
-    sss.employee + philHealthEmployee + PAGIBIG_FIXED + probationaryDeduction;
+    sss.employee +
+    philHealthEmployee +
+    PAGIBIG_FIXED +
+    probationaryDeduction +
+    safeTardinessDeduction +
+    safeLoanDeductions;
 
-  const netPay = round2(grossWithAhop - employeeTotalDeductions);
+  const netPay = round2(grossWithAhop + safeSalaryAdjustments - employeeTotalDeductions);
 
   const annualRegularProjection =
     input.salaryType === "DAILY"
@@ -147,6 +198,11 @@ export function calculatePayroll(input: PayrollInputs): PayrollResult {
     regularPay,
     ahopTopup,
     grossWithAhop,
+    overtimeRegularPay,
+    overtimeExtendedPay,
+    silPay,
+    slPay,
+    absencePay,
     sssEmployee: sss.employee,
     sssEmployer: sss.employer,
     philHealthEmployee,
@@ -154,7 +210,11 @@ export function calculatePayroll(input: PayrollInputs): PayrollResult {
     pagIbigEmployee: PAGIBIG_FIXED,
     pagIbigEmployer: PAGIBIG_FIXED,
     probationaryDeduction,
+    tardinessDeduction: safeTardinessDeduction,
+    loanDeductions: safeLoanDeductions,
+    salaryAdjustments: safeSalaryAdjustments,
     netPay,
+    ytdAhop,
     annualRegularProjection,
     annualWithAhopProjection,
   };

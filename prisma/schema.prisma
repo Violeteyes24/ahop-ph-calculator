@@ -11,6 +11,11 @@ enum SalaryType {
   MONTHLY
 }
 
+enum SalaryCategory {
+  AHOP
+  NON_AHOP
+}
+
 enum PaymentMethod {
   CASH
   BANK
@@ -21,50 +26,140 @@ enum EmploymentStage {
   REGULAR
 }
 
+enum UserRole {
+  ADMIN
+  EMPLOYEE
+}
+
+enum PayrollPeriodStatus {
+  DRAFT
+  COMPLETED
+  ARCHIVED
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  role         UserRole @default(EMPLOYEE)
+  employeeId   String?  @unique
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  employee EmployeeProfile? @relation(fields: [employeeId], references: [id], onDelete: SetNull)
+}
+
 model EmployeeProfile {
-  id                      String            @id @default(cuid())
-  fullName                String
-  dateStarted             DateTime
-  salaryType              SalaryType
-  dailyRate               Decimal?
-  monthlyRate             Decimal?
-  employmentStage         EmploymentStage   @default(PROBATIONARY)
-  probationaryDeductionPct Decimal         @default(0)
-  paymentMethod           PaymentMethod     @default(BANK)
-  regionCode              String            @default("NCR")
-  createdAt               DateTime          @default(now())
-  updatedAt               DateTime          @updatedAt
-  payrollSnapshots        PayrollSnapshot[]
+  id                       String            @id @default(cuid())
+  fullName                 String
+  position                 String?
+  dateStarted              DateTime
+  salaryType               SalaryType
+  salaryCategory           SalaryCategory    @default(AHOP)
+  dailyRate                Decimal?
+  monthlyRate              Decimal?
+  employmentStage          EmploymentStage   @default(PROBATIONARY)
+  probationaryDeductionPct Decimal           @default(0)
+  paymentMethod            PaymentMethod     @default(BANK)
+  regionCode               String            @default("NCR")
+  deminimisAmount          Decimal           @default(0)
+  isActive                 Boolean           @default(true)
+  createdAt                DateTime          @default(now())
+  updatedAt                DateTime          @updatedAt
+
+  payrollSnapshots  PayrollSnapshot[]
+  attendanceEntries AttendanceEntry[]
+  user              User?
+}
+
+model PayrollPeriod {
+  id           String              @id @default(cuid())
+  label        String
+  periodStart  DateTime
+  periodEnd    DateTime
+  status       PayrollPeriodStatus @default(DRAFT)
+  baselineDays Int                 @default(23)
+  createdBy    String
+  processedAt  DateTime?
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+
+  attendanceEntries AttendanceEntry[]
+  snapshots         PayrollSnapshot[]
+}
+
+model AttendanceEntry {
+  id                    String   @id @default(cuid())
+  periodId              String
+  employeeId            String
+  workingDays           Int      @default(0)
+  overtimeRegularHours  Decimal  @default(0)
+  overtimeExtendedHours Decimal  @default(0)
+  silDays               Decimal  @default(0)
+  slHours               Decimal  @default(0)
+  absenceHours          Decimal  @default(0)
+  tardinessDeduction    Decimal  @default(0)
+  loanDeductions        Decimal  @default(0)
+  salaryAdjustments     Decimal  @default(0)
+  notes                 String?
+  calculationError      String?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  period   PayrollPeriod   @relation(fields: [periodId], references: [id], onDelete: Cascade)
+  employee EmployeeProfile @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@unique([periodId, employeeId])
 }
 
 model PayrollSnapshot {
-  id                    String          @id @default(cuid())
+  id                    String   @id @default(cuid())
   employeeId            String
+  periodId              String?
   periodStart           DateTime
   periodEnd             DateTime
   workingDays           Int
-  baselineDays          Int             @default(23)
+  baselineDays          Int      @default(23)
   regularPay            Decimal
   ahopTopup             Decimal
   grossWithAhop         Decimal
   sssEmployee           Decimal
+  sssEmployer           Decimal  @default(0)
   philHealthEmployee    Decimal
+  philHealthEmployer    Decimal  @default(0)
   pagIbigEmployee       Decimal
+  pagIbigEmployer       Decimal  @default(0)
   probationaryDeduction Decimal
   netPay                Decimal
-  createdAt             DateTime        @default(now())
+  overtimeRegularHours  Decimal  @default(0)
+  overtimeExtendedHours Decimal  @default(0)
+  overtimeRegularPay    Decimal  @default(0)
+  overtimeExtendedPay   Decimal  @default(0)
+  silDays               Decimal  @default(0)
+  silPay                Decimal  @default(0)
+  slHours               Decimal  @default(0)
+  slPay                 Decimal  @default(0)
+  absenceHours          Decimal  @default(0)
+  absencePay            Decimal  @default(0)
+  tardinessDeduction    Decimal  @default(0)
+  loanDeductions        Decimal  @default(0)
+  salaryAdjustments     Decimal  @default(0)
+  ytdAhop               Decimal  @default(0)
+  previousYtdAhop       Decimal  @default(0)
+  createdAt             DateTime @default(now())
 
   employee EmployeeProfile @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  period   PayrollPeriod?  @relation(fields: [periodId], references: [id], onDelete: SetNull)
 }
 
 model ContributionRateConfig {
-  id                   String   @id @default(cuid())
-  name                 String   @default("Handbook v1")
-  philHealthRate       Decimal  @default(2.5)
-  pagIbigEmployeeFixed Decimal  @default(200)
-  pagIbigEmployerFixed Decimal  @default(200)
+  id                   String    @id @default(cuid())
+  name                 String    @default("Handbook v1")
+  philHealthRate       Decimal   @default(2.5)
+  pagIbigEmployeeFixed Decimal   @default(200)
+  pagIbigEmployerFixed Decimal   @default(200)
   effectiveFrom        DateTime
   effectiveTo          DateTime?
-  createdAt            DateTime @default(now())
-  updatedAt            DateTime @updatedAt
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
 }

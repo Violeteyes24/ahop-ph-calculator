@@ -1,0 +1,44 @@
+import { prisma } from "@/lib/prisma";
+import { notFound } from "next/navigation";
+import Link from "next/link";
+import { EditEmployeeForm } from "./form";
+
+export default async function EditEmployeePage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+
+  const employee = await prisma.employeeProfile.findUnique({
+    where: { id },
+  });
+
+  if (!employee) notFound();
+
+  const defaults = {
+    fullName: employee.fullName,
+    position: employee.position ?? "",
+    dateStarted: employee.dateStarted.toISOString().split("T")[0],
+    salaryType: employee.salaryType,
+    salaryCategory: employee.salaryCategory,
+    dailyRate: employee.dailyRate ? String(employee.dailyRate) : "",
+    monthlyRate: employee.monthlyRate ? String(employee.monthlyRate) : "",
+    employmentStage: employee.employmentStage,
+    probationaryDeductionPct: String(employee.probationaryDeductionPct),
+    paymentMethod: employee.paymentMethod,
+    deminimisAmount: String(employee.deminimisAmount),
+  };
+
+  return (
+    <div className="max-w-2xl">
+      <div className="mb-6">
+        <Link href={`/admin/employees/${id}`} className="text-sm text-[#6b7280] hover:text-[#1a2e1f]">
+          ← Back to employee
+        </Link>
+        <h1 className="mt-2 text-2xl font-semibold tracking-tight text-[#1a2e1f]">Edit employee</h1>
+      </div>
+      <EditEmployeeForm id={id} defaults={defaults} />
+    </div>
+  );
+}
