@@ -6,6 +6,7 @@ import Link from "next/link";
 
 const initialState: PayrollActionState = {};
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function suggestLabel(start: string, end: string): string {
   if (!start || !end) return "";
   const s = new Date(start);

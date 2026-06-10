@@ -16,6 +16,13 @@ export interface PayrollInputs {
   loanDeductions?: number;
   salaryAdjustments?: number;
   previousYtdAhop?: number;
+  contributionRates?: ContributionRateInputs;
+}
+
+export interface ContributionRateInputs {
+  philHealthRatePct?: number;
+  pagIbigEmployeeFixed?: number;
+  pagIbigEmployerFixed?: number;
 }
 
 export interface PayrollResult {
@@ -137,6 +144,16 @@ export function calculatePayroll(input: PayrollInputs): PayrollResult {
   const safeLoanDeductions = Math.max(0, input.loanDeductions || 0);
   const safeSalaryAdjustments = input.salaryAdjustments || 0;
   const safePreviousYtdAhop = Math.max(0, input.previousYtdAhop || 0);
+  const philHealthRate =
+    Math.max(0, input.contributionRates?.philHealthRatePct ?? PHILHEALTH_RATE * 100) / 100;
+  const pagIbigEmployeeFixed = Math.max(
+    0,
+    input.contributionRates?.pagIbigEmployeeFixed ?? PAGIBIG_FIXED
+  );
+  const pagIbigEmployerFixed = Math.max(
+    0,
+    input.contributionRates?.pagIbigEmployerFixed ?? PAGIBIG_FIXED
+  );
 
   const inferredMonthlyRateFromDaily = round2(safeDailyRate * safeBaselineDays);
   const effectiveMonthlyRate = safeMonthlyRate > 0 ? safeMonthlyRate : inferredMonthlyRateFromDaily;
@@ -169,15 +186,15 @@ export function calculatePayroll(input: PayrollInputs): PayrollResult {
   const ytdAhop = round2(safePreviousYtdAhop + ahopTopup);
 
   const sss = getSss(grossWithAhop);
-  const philHealthEmployee = round2(grossWithAhop * PHILHEALTH_RATE);
-  const philHealthEmployer = round2(grossWithAhop * PHILHEALTH_RATE);
+  const philHealthEmployee = round2(grossWithAhop * philHealthRate);
+  const philHealthEmployer = round2(grossWithAhop * philHealthRate);
 
   const probationaryDeduction = round2(grossWithAhop * (safeProbationPct / 100));
 
   const employeeTotalDeductions =
     sss.employee +
     philHealthEmployee +
-    PAGIBIG_FIXED +
+    pagIbigEmployeeFixed +
     probationaryDeduction +
     safeTardinessDeduction +
     safeLoanDeductions;
@@ -207,8 +224,8 @@ export function calculatePayroll(input: PayrollInputs): PayrollResult {
     sssEmployer: sss.employer,
     philHealthEmployee,
     philHealthEmployer,
-    pagIbigEmployee: PAGIBIG_FIXED,
-    pagIbigEmployer: PAGIBIG_FIXED,
+    pagIbigEmployee: pagIbigEmployeeFixed,
+    pagIbigEmployer: pagIbigEmployerFixed,
     probationaryDeduction,
     tardinessDeduction: safeTardinessDeduction,
     loanDeductions: safeLoanDeductions,

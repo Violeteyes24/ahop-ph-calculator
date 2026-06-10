@@ -6,6 +6,7 @@ import { z } from "zod";
 import { requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { calculatePayroll } from "@/lib/ahop";
+import { getContributionRatesForPeriod } from "@/lib/contribution-rates";
 
 const createPeriodSchema = z.object({
   label: z.string().min(1, "Label is required"),
@@ -143,6 +144,10 @@ export async function runPayrollAction(periodId: string): Promise<{ success: boo
   if (!period) return { success: false, error: "Period not found" };
   if (period.status !== "DRAFT") return { success: false, error: "Payroll has already been run for this period" };
 
+  const contributionRates = await getContributionRatesForPeriod(period.periodStart, period.periodEnd);
+  const computedSnapshots = [];
+  const calculationErrors: Array<{ entryId: string; message: string }> = [];
+
   for (const entry of period.attendanceEntries) {
     const emp = entry.employee;
 
@@ -174,70 +179,79 @@ export async function runPayrollAction(periodId: string): Promise<{ success: boo
         loanDeductions: Number(entry.loanDeductions),
         salaryAdjustments: Number(entry.salaryAdjustments),
         previousYtdAhop,
+        contributionRates,
       };
 
       const result = calculatePayroll(input);
 
-      // Delete existing snapshot for this period+employee (idempotency)
-      await prisma.payrollSnapshot.deleteMany({
-        where: { periodId, employeeId: emp.id },
-      });
-
-      await prisma.payrollSnapshot.create({
-        data: {
-          employeeId: emp.id,
-          periodId,
-          periodStart: period.periodStart,
-          periodEnd: period.periodEnd,
-          workingDays: entry.workingDays,
-          baselineDays: period.baselineDays,
-          regularPay: result.regularPay,
-          ahopTopup: result.ahopTopup,
-          grossWithAhop: result.grossWithAhop,
-          sssEmployee: result.sssEmployee,
-          sssEmployer: result.sssEmployer,
-          philHealthEmployee: result.philHealthEmployee,
-          philHealthEmployer: result.philHealthEmployer,
-          pagIbigEmployee: result.pagIbigEmployee,
-          pagIbigEmployer: result.pagIbigEmployer,
-          probationaryDeduction: result.probationaryDeduction,
-          netPay: result.netPay,
-          overtimeRegularHours: Number(entry.overtimeRegularHours),
-          overtimeExtendedHours: Number(entry.overtimeExtendedHours),
-          overtimeRegularPay: result.overtimeRegularPay,
-          overtimeExtendedPay: result.overtimeExtendedPay,
-          silDays: Number(entry.silDays),
-          silPay: result.silPay,
-          slHours: Number(entry.slHours),
-          slPay: result.slPay,
-          absenceHours: Number(entry.absenceHours),
-          absencePay: result.absencePay,
-          tardinessDeduction: result.tardinessDeduction,
-          loanDeductions: result.loanDeductions,
-          salaryAdjustments: result.salaryAdjustments,
-          ytdAhop: result.ytdAhop,
-          previousYtdAhop,
-        },
-      });
-
-      // Clear any previous error on this entry
-      await prisma.attendanceEntry.update({
-        where: { id: entry.id },
-        data: { calculationError: null },
+      computedSnapshots.push({
+        employeeId: emp.id,
+        periodId,
+        periodStart: period.periodStart,
+        periodEnd: period.periodEnd,
+        workingDays: entry.workingDays,
+        baselineDays: period.baselineDays,
+        regularPay: result.regularPay,
+        ahopTopup: result.ahopTopup,
+        grossWithAhop: result.grossWithAhop,
+        sssEmployee: result.sssEmployee,
+        sssEmployer: result.sssEmployer,
+        philHealthEmployee: result.philHealthEmployee,
+        philHealthEmployer: result.philHealthEmployer,
+        pagIbigEmployee: result.pagIbigEmployee,
+        pagIbigEmployer: result.pagIbigEmployer,
+        probationaryDeduction: result.probationaryDeduction,
+        netPay: result.netPay,
+        overtimeRegularHours: Number(entry.overtimeRegularHours),
+        overtimeExtendedHours: Number(entry.overtimeExtendedHours),
+        overtimeRegularPay: result.overtimeRegularPay,
+        overtimeExtendedPay: result.overtimeExtendedPay,
+        silDays: Number(entry.silDays),
+        silPay: result.silPay,
+        slHours: Number(entry.slHours),
+        slPay: result.slPay,
+        absenceHours: Number(entry.absenceHours),
+        absencePay: result.absencePay,
+        tardinessDeduction: result.tardinessDeduction,
+        loanDeductions: result.loanDeductions,
+        salaryAdjustments: result.salaryAdjustments,
+        ytdAhop: result.ytdAhop,
+        previousYtdAhop,
       });
     } catch (err) {
       const message = err instanceof Error ? err.message : "Unknown error";
-      await prisma.attendanceEntry.update({
-        where: { id: entry.id },
-        data: { calculationError: message },
-      });
+      calculationErrors.push({ entryId: entry.id, message });
     }
   }
 
-  await prisma.payrollPeriod.update({
-    where: { id: periodId },
-    data: { status: "COMPLETED", processedAt: new Date() },
-  });
+  if (calculationErrors.length > 0) {
+    await Promise.all(
+      calculationErrors.map((error) =>
+        prisma.attendanceEntry.update({
+          where: { id: error.entryId },
+          data: { calculationError: error.message },
+        })
+      )
+    );
+    revalidatePath(`/admin/payroll/${periodId}`);
+    return {
+      success: false,
+      error: `${calculationErrors.length} employee calculation failed. Review row errors before running payroll again.`,
+    };
+  }
+
+  await prisma.$transaction([
+    prisma.payrollSnapshot.deleteMany({ where: { periodId } }),
+    prisma.payrollSnapshot.createMany({ data: computedSnapshots }),
+    prisma.attendanceEntry.updateMany({
+      where: { periodId },
+      data: { calculationError: null },
+    }),
+    prisma.payrollPeriod.update({
+      where: { id: periodId },
+      data: { status: "COMPLETED", processedAt: new Date() },
+    }),
+  ]);
 
   revalidatePath("/admin/payroll");
   revalidatePath("/admin/dashboard");

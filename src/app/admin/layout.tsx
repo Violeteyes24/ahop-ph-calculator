@@ -2,6 +2,8 @@ import { requireAdmin } from "@/lib/auth";
 import { logoutAction } from "@/app/actions/auth";
 import Link from "next/link";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   await requireAdmin();
 
@@ -29,6 +31,10 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           <NavLink href="/admin/payroll">
             <PayrollIcon />
             Payroll
+          </NavLink>
+          <NavLink href="/admin/payroll/import">
+            <ImportIcon />
+            Import
           </NavLink>
           <NavLink href="/admin/reports">
             <ReportsIcon />
@@ -108,6 +114,16 @@ function ReportsIcon() {
       <rect x="6" y="11" width="3" height="7" rx="0.5" />
       <rect x="11" y="8" width="3" height="10" rx="0.5" />
       <rect x="16" y="5" width="3" height="13" rx="0.5" />
+    </svg>
+  );
+}
+
+function ImportIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-4 w-4 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 3v12" />
+      <path d="m7 8 5-5 5 5" />
+      <path d="M5 15v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4" />
     </svg>
   );
 }

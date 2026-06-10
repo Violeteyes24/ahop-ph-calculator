@@ -32,12 +32,20 @@ export default async function PayrollPeriodsPage() {
             {periods.length} period{periods.length !== 1 ? "s" : ""}
           </p>
         </div>
-        <Link
-          href="/admin/payroll/new"
-          className="rounded-lg bg-[#2f4f3e] px-4 py-2 text-sm font-semibold text-white hover:bg-[#274636]"
-        >
-          New period
-        </Link>
+        <div className="flex gap-2">
+          <Link
+            href="/admin/payroll/import"
+            className="rounded-lg border border-[#d1d5db] bg-white px-4 py-2 text-sm font-medium text-[#374151] hover:bg-[#f5f0e8]"
+          >
+            Import Excel
+          </Link>
+          <Link
+            href="/admin/payroll/new"
+            className="rounded-lg bg-[#2f4f3e] px-4 py-2 text-sm font-semibold text-white hover:bg-[#274636]"
+          >
+            New period
+          </Link>
+        </div>
       </div>
 
       <div className="rounded-xl border border-[#ddd6ca] bg-white overflow-hidden">

@@ -1,6 +1,6 @@
 PAYROLL RECONCILIATION REPORT
 ==============================
-Period: Unknown to Unknown
+Period: 2026-06-10 to 2026-06-10
 
 SUMMARY
 Total Employees: 1

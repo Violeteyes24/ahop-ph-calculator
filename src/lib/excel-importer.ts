@@ -37,6 +37,16 @@ export interface ExcelPayrollData {
   employees: ExcelEmployeeRow[];
 }
 
+export interface SerializedExcelEmployeeRow extends Omit<ExcelEmployeeRow, "dateOfJoining"> {
+  dateOfJoining: string | null;
+}
+
+export interface SerializedExcelPayrollData {
+  periodStart: string;
+  periodEnd: string;
+  employees: SerializedExcelEmployeeRow[];
+}
+
 const COLUMN_INDICES = {
   name: 0, // A
   position: 1, // B
@@ -70,7 +80,7 @@ const COLUMN_INDICES = {
   absenceHours: 29, // AD
 };
 
-function parseExcelDate(dateValue: any): Date | null {
+function parseExcelDate(dateValue: unknown): Date | null {
   if (!dateValue) return null;
 
   if (typeof dateValue === "number") {
@@ -89,19 +99,18 @@ function parseExcelDate(dateValue: any): Date | null {
   return null;
 }
 
-function safeParse(value: any, fallback: number = 0): number {
+function safeParse(value: unknown, fallback: number = 0): number {
   if (value === null || value === undefined || value === "") return fallback;
   const num = parseFloat(String(value));
   return isNaN(num) ? fallback : num;
 }
 
-function parseString(value: any, fallback: string = ""): string {
+function parseString(value: unknown, fallback: string = ""): string {
   if (value === null || value === undefined) return fallback;
   return String(value).trim();
 }
 
-export async function importExcelPayroll(filePath: string): Promise<ExcelPayrollData> {
-  const workbook = XLSX.readFile(filePath);
+function parsePayrollWorkbook(workbook: XLSX.WorkBook): ExcelPayrollData {
   const sheetName = "Template Source <Month Date>";
 
   if (!workbook.SheetNames.includes(sheetName)) {
@@ -109,16 +118,13 @@ export async function importExcelPayroll(filePath: string): Promise<ExcelPayroll
   }
 
   const worksheet = workbook.Sheets[sheetName];
-  const rows = XLSX.utils.sheet_to_json(worksheet, { header: "A" }) as Record<string, any>[];
+  const rows = XLSX.utils.sheet_to_json(worksheet, { header: "A" }) as Record<string, unknown>[];
 
   // Extract period from header (row 1)
   const headerRow = rows[0];
-  const periodStartStr = headerRow["B"] || "";
-  const periodEndStr = headerRow["C"] || "";
-
-  // Use provided date or defaults
-  const periodStart = new Date(periodStartStr || new Date().toISOString().split("T")[0]);
-  const periodEnd = new Date(periodEndStr || new Date().toISOString().split("T")[0]);
+  const fallbackDate = new Date();
+  const periodStart = parseExcelDate(headerRow["B"]) ?? fallbackDate;
+  const periodEnd = parseExcelDate(headerRow["C"]) ?? fallbackDate;
 
   const employees: ExcelEmployeeRow[] = [];
 
@@ -169,6 +175,37 @@ export async function importExcelPayroll(filePath: string): Promise<ExcelPayroll
     periodStart,
     periodEnd,
     employees,
+  };
+}
+
+export async function importExcelPayroll(filePath: string): Promise<ExcelPayrollData> {
+  return parsePayrollWorkbook(XLSX.readFile(filePath));
+}
+
+export async function importExcelPayrollBuffer(buffer: ArrayBuffer | Buffer): Promise<ExcelPayrollData> {
+  const workbook = XLSX.read(buffer, { type: "buffer" });
+  return parsePayrollWorkbook(workbook);
+}
+
+export function serializeExcelPayrollData(data: ExcelPayrollData): SerializedExcelPayrollData {
+  return {
+    periodStart: data.periodStart.toISOString(),
+    periodEnd: data.periodEnd.toISOString(),
+    employees: data.employees.map((employee) => ({
+      ...employee,
+      dateOfJoining: employee.dateOfJoining ? employee.dateOfJoining.toISOString() : null,
+    })),
+  };
+}
+
+export function deserializeExcelPayrollData(data: SerializedExcelPayrollData): ExcelPayrollData {
+  return {
+    periodStart: new Date(data.periodStart),
+    periodEnd: new Date(data.periodEnd),
+    employees: data.employees.map((employee) => ({
+      ...employee,
+      dateOfJoining: employee.dateOfJoining ? new Date(employee.dateOfJoining) : null,
+    })),
   };
 }
 

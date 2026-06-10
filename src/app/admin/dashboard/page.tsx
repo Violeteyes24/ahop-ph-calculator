@@ -9,14 +9,6 @@ function toPeso(value: number): string {
   }).format(value);
 }
 
-function toDateLabel(value: Date | string): string {
-  return new Intl.DateTimeFormat("en-PH", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  }).format(new Date(value));
-}
-
 export default async function DashboardPage() {
   const [employeeCount, openPeriod, recentPeriods] = await Promise.all([
     prisma.employeeProfile.count({ where: { isActive: true } }),
@@ -81,6 +73,12 @@ export default async function DashboardPage() {
           className="rounded-lg bg-[#2f4f3e] px-4 py-2 text-sm font-semibold text-white hover:bg-[#274636]"
         >
           New payroll period
+        </Link>
+        <Link
+          href="/admin/payroll/import"
+          className="rounded-lg border border-[#d1d5db] bg-white px-4 py-2 text-sm font-medium text-[#374151] hover:bg-[#f5f0e8]"
+        >
+          Import Excel
         </Link>
         <Link
           href="/admin/employees/new"

@@ -7,7 +7,26 @@ const globalForPrisma = globalThis as unknown as {
   pgPool: Pool | undefined;
 };
 
-const connectionString = process.env.DATABASE_URL;
+function normalizePostgresUrl(value: string | undefined): string | undefined {
+  if (!value) return value;
+
+  try {
+    const url = new URL(value);
+    if (url.protocol === "postgres:" || url.protocol === "postgresql:") {
+      const schema = process.env.PAYROLL_DB_SCHEMA ?? "payroll";
+      url.searchParams.set("schema", schema);
+      url.searchParams.set("options", `-c search_path=${schema}`);
+      if (url.searchParams.has("sslmode") && !url.searchParams.has("uselibpqcompat")) {
+        url.searchParams.set("uselibpqcompat", "true");
+      }
+    }
+    return url.toString();
+  } catch {
+    return value;
+  }
+}
+
+const connectionString = normalizePostgresUrl(process.env.DATABASE_URL);
 
 if (!connectionString) {
   throw new Error("DATABASE_URL is required for PostgreSQL runtime access.");

@@ -18,6 +18,8 @@ Employee-friendly calculator and explainer for Accumulated Holiday and Overtime 
 	- SSS, PhilHealth, Pag-IBIG employee and employer shares
 	- Net pay
 - Handbook sample fixtures are shown in-app for quick validation
+- Admin payroll system with employee records, draft payroll periods, attendance entry, payroll snapshots, reports, payslips, and CSV export
+- Excel workbook import at `/admin/payroll/import`, with preview before creating a draft payroll period
 
 ## Tech Stack
 
@@ -51,11 +53,17 @@ Option B: Docker Compose:
 docker compose up -d
 ```
 
-4. Generate Prisma client and run first migration:
+Option C: Supabase Postgres:
+- Set `DATABASE_URL` to the pooled Supabase connection string.
+- Set `DIRECT_URL` to the direct Supabase connection string.
+- Add `schema=payroll` and `uselibpqcompat=true` to both URLs.
+
+4. Generate Prisma client, apply migrations, and seed defaults:
 
 ```bash
-npm run prisma:migrate -- --name init
+npm run prisma:migrate
 npm run prisma:generate
+npm run prisma:seed
 ```
 
 5. Start development server:
@@ -133,4 +141,5 @@ npm run prisma:studio
 
 - v1 annual projection uses fixed handbook baseline behavior.
 - SSS/PhilHealth/Pag-IBIG logic is seeded from handbook examples and should be replaced with updated official tables/circulars before production payroll use.
-- Use a managed PostgreSQL instance (for example, Vercel Postgres, Neon, or Supabase) for production and set DATABASE_URL in Vercel project settings.
+- Use a managed PostgreSQL instance for production. Supabase is supported as hosted PostgreSQL; this app does not use Supabase Auth/RLS in v1.
+- Keep payroll tables in the `payroll` Postgres schema so unrelated Supabase `public` tables are not affected.

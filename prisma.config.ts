@@ -7,8 +7,28 @@ export default defineConfig({
   schema: "prisma/schema.prisma",
   migrations: {
     path: "prisma/migrations",
+    seed: "tsx prisma/seed.ts",
   },
   datasource: {
-    url: process.env["DATABASE_URL"],
+    url: normalizePostgresUrl(process.env["DIRECT_URL"] ?? process.env["DATABASE_URL"]),
   },
 });
+
+function normalizePostgresUrl(value: string | undefined): string | undefined {
+  if (!value) return value;
+
+  try {
+    const url = new URL(value);
+    if (url.protocol === "postgres:" || url.protocol === "postgresql:") {
+      const schema = process.env["PAYROLL_DB_SCHEMA"] ?? "payroll";
+      url.searchParams.set("schema", schema);
+      url.searchParams.set("options", `-c search_path=${schema}`);
+      if (url.searchParams.has("sslmode") && !url.searchParams.has("uselibpqcompat")) {
+        url.searchParams.set("uselibpqcompat", "true");
+      }
+    }
+    return url.toString();
+  } catch {
+    return value;
+  }
+}

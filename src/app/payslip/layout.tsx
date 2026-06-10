@@ -1,6 +1,8 @@
 import { requireEmployee } from "@/lib/auth";
 import { logoutAction } from "@/app/actions/auth";
 
+export const dynamic = "force-dynamic";
+
 export default async function PayslipLayout({ children }: { children: React.ReactNode }) {
   await requireEmployee();
 
