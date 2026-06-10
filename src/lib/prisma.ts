@@ -28,26 +28,40 @@ function normalizePostgresUrl(value: string | undefined): string | undefined {
 
 const connectionString = normalizePostgresUrl(process.env.DATABASE_URL);
 
-if (!connectionString) {
-  throw new Error("DATABASE_URL is required for PostgreSQL runtime access.");
+function createMissingDatabaseProxy(): PrismaClient {
+  return new Proxy({} as PrismaClient, {
+    get() {
+      throw new Error("DATABASE_URL is required for PostgreSQL runtime access.");
+    },
+  });
 }
 
-const pool =
-  globalForPrisma.pgPool ??
-  new Pool({
-    connectionString,
-  });
+function createPrismaClient(): PrismaClient {
+  if (!connectionString) {
+    return createMissingDatabaseProxy();
+  }
 
-const adapter = new PrismaPg(pool);
+  const pool =
+    globalForPrisma.pgPool ??
+    new Pool({
+      connectionString,
+    });
 
-export const prisma =
-  globalForPrisma.prisma ??
-  new PrismaClient({
+  const adapter = new PrismaPg(pool);
+  const client = new PrismaClient({
     adapter,
     log: ["error", "warn"],
   });
 
+  if (process.env.NODE_ENV !== "production") {
+    globalForPrisma.pgPool = pool;
+  }
+
+  return client;
+}
+
+export const prisma = globalForPrisma.prisma ?? createPrismaClient();
+
 if (process.env.NODE_ENV !== "production") {
-  globalForPrisma.pgPool = pool;
   globalForPrisma.prisma = prisma;
 }
