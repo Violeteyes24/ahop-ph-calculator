@@ -2,6 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 
+function csvCell(value: string | number): string {
+  const text = String(value);
+  return /[",\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+}
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ periodId: string }> }
@@ -38,92 +43,111 @@ export async function GET(
   }
 
   const headers = [
-    "Disbursement Method",
+    "CASH",
     "Employee Name",
     "Position",
     "Date of Joining",
+    "Salary Disbursement Type",
     "Basic Pay",
     "Leaves",
-    "Overtime (Regular)",
-    "Overtime (Extended)",
-    "Another OT",
-    "Accumulated Holiday",
+    "OT",
+    "AOT",
+    "AH",
     "OT %",
     "CO AHOP",
     "De Minimis",
     "Tardiness/Undertime",
     "Absence",
-    "Salary Adjustments",
+    "Salary adjustments/SIL Conversion",
     "Gross Income",
     "SSS",
     "Philhealth",
-    "Pag-ibig",
-    "Withholding Tax",
+    "Pagibig",
+    "W/Holding Tax",
     "Loans",
-    "Total Deductions",
+    "Total",
     "Net Income",
-    "Previous YTD AHOP",
+    "Previous Pay Period's YTD AHOP",
     "YTD AHOP",
   ];
 
   const rows = period.snapshots.map((snap) => {
     const emp = snap.employee;
+    const deMinimisBiMonthly = Number(emp.deminimisAmount) / 2;
+    const tardinessUndertime = -Math.abs(Number(snap.tardinessDeduction));
+    const absence = -Math.abs(Number(snap.absencePay));
     const totalDeductions =
       Number(snap.sssEmployee) +
       Number(snap.philHealthEmployee) +
       Number(snap.pagIbigEmployee) +
-      Number(snap.probationaryDeduction) +
-      Number(snap.tardinessDeduction) +
       Number(snap.loanDeductions);
+    const grossIncome =
+      Number(snap.grossWithAhop) +
+      deMinimisBiMonthly -
+      Math.abs(Number(snap.tardinessDeduction));
+    const netIncome = grossIncome + Number(snap.salaryAdjustments) - totalDeductions;
 
     return [
-      emp.paymentMethod,
+      emp.paymentMethod === "CASH" ? "CASH" : "",
       emp.fullName,
       emp.position ?? "",
       emp.dateStarted.toISOString().split("T")[0],
+      emp.paymentMethod === "CASH" ? "Cash" : "Online",
       Number(snap.regularPay).toFixed(2),
       (Number(snap.silPay) + Number(snap.slPay)).toFixed(2),
-      Number(snap.overtimeRegularPay).toFixed(2),
-      Number(snap.overtimeExtendedPay).toFixed(2),
+      (Number(snap.overtimeRegularPay) + Number(snap.overtimeExtendedPay)).toFixed(2),
+      "0.00",
+      "0.00",
       "0.00",
       Number(snap.ahopTopup).toFixed(2),
-      Number(snap.overtimeRegularPay) > 0 ? "100" : "0",
-      "0.00",
-      Number(emp.deminimisAmount).toFixed(2),
-      Number(snap.tardinessDeduction).toFixed(2),
-      (-Number(snap.absencePay)).toFixed(2),
+      deMinimisBiMonthly.toFixed(2),
+      tardinessUndertime.toFixed(2),
+      absence.toFixed(2),
       Number(snap.salaryAdjustments).toFixed(2),
-      Number(snap.grossWithAhop).toFixed(2),
+      grossIncome.toFixed(2),
       Number(snap.sssEmployee).toFixed(2),
       Number(snap.philHealthEmployee).toFixed(2),
       Number(snap.pagIbigEmployee).toFixed(2),
       "0.00",
       Number(snap.loanDeductions).toFixed(2),
       totalDeductions.toFixed(2),
-      Number(snap.netPay).toFixed(2),
+      netIncome.toFixed(2),
       Number(snap.previousYtdAhop).toFixed(2),
       Number(snap.ytdAhop).toFixed(2),
-    ].join(",");
+    ].map(csvCell).join(",");
   });
 
   const periodStartStr = period.periodStart.toISOString().split("T")[0];
   const periodEndStr = period.periodEnd.toISOString().split("T")[0];
-  const totalGross = period.snapshots.reduce((s, snap) => s + Number(snap.grossWithAhop), 0);
+  const totalGross = period.snapshots.reduce((sum, snap) => {
+    const deMinimisBiMonthly = Number(snap.employee.deminimisAmount) / 2;
+    return sum + Number(snap.grossWithAhop) + deMinimisBiMonthly - Math.abs(Number(snap.tardinessDeduction));
+  }, 0);
   const totalDed = period.snapshots.reduce(
-    (s, snap) =>
-      s +
+    (sum, snap) =>
+      sum +
       Number(snap.sssEmployee) +
       Number(snap.philHealthEmployee) +
       Number(snap.pagIbigEmployee) +
-      Number(snap.probationaryDeduction) +
-      Number(snap.tardinessDeduction) +
       Number(snap.loanDeductions),
     0
   );
-  const totalNet = period.snapshots.reduce((s, snap) => s + Number(snap.netPay), 0);
+  const totalNet = period.snapshots.reduce((sum, snap) => {
+    const deMinimisBiMonthly = Number(snap.employee.deminimisAmount) / 2;
+    const totalDeductions =
+      Number(snap.sssEmployee) +
+      Number(snap.philHealthEmployee) +
+      Number(snap.pagIbigEmployee) +
+      Number(snap.loanDeductions);
+    const grossIncome =
+      Number(snap.grossWithAhop) +
+      deMinimisBiMonthly -
+      Math.abs(Number(snap.tardinessDeduction));
+    return sum + grossIncome + Number(snap.salaryAdjustments) - totalDeductions;
+  }, 0);
 
   const csv = [
-    headers.join(","),
+    headers.map(csvCell).join(","),
     ...rows,
     "",
     `Period: ${periodStartStr} to ${periodEndStr}`,

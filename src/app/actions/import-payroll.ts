@@ -189,6 +189,9 @@ export async function confirmPayrollImportAction(batchId: string, formData: Form
     for (const row of data.employees) {
       const salaryType = row.salaryType === "AHOP" ? "DAILY" : "MONTHLY";
       const salaryCategory = row.salaryType === "AHOP" ? "AHOP" : "NON_AHOP";
+      const tardinessDeduction = Math.abs(row.tardinessDeduction || 0);
+      const loanDeductions = Math.abs(row.loans || 0);
+      const salaryAdjustments = row.salaryAdjustments || 0;
       const existingEmployee = employeesByName.get(normalizeName(row.name));
       const employeeData = {
         fullName: row.name,
@@ -232,9 +235,9 @@ export async function confirmPayrollImportAction(batchId: string, formData: Form
           silDays: row.silDays,
           slHours: row.slHours,
           absenceHours: row.absenceHours,
-          tardinessDeduction: 0,
-          loanDeductions: 0,
-          salaryAdjustments: 0,
+          tardinessDeduction,
+          loanDeductions,
+          salaryAdjustments,
           notes: `Imported from ${batch.fileName}`,
           calculationError: null,
         },
@@ -247,6 +250,9 @@ export async function confirmPayrollImportAction(batchId: string, formData: Form
           silDays: row.silDays,
           slHours: row.slHours,
           absenceHours: row.absenceHours,
+          tardinessDeduction,
+          loanDeductions,
+          salaryAdjustments,
           notes: `Imported from ${batch.fileName}`,
         },
       });

@@ -2,16 +2,16 @@ import { PayrollResult } from "./ahop";
 import { ExcelEmployeeRow } from "./excel-importer";
 
 export interface PayrollSummaryRow {
-  disbursementMethod: string;
+  cash: string;
   employeeName: string;
   position: string;
   dateOfJoining: string;
+  salaryDisbursementType: string;
   basicPay: number;
   leaves: number;
-  overtimeRegular: number;
-  overtimeExtended: number;
-  anotherOT: number;
-  accumulatedHoliday: number;
+  ot: number;
+  aot: number;
+  holidayPay: number;
   otPercentage: number;
   coAhop: number;
   deminimis: number;
@@ -40,6 +40,15 @@ export interface PayrollSummary {
   rows: PayrollSummaryRow[];
 }
 
+function sheetOrFallback(value: number | undefined, fallback: number): number {
+  return value !== undefined && Number.isFinite(value) && value !== 0 ? value : fallback;
+}
+
+function csvCell(value: string | number): string {
+  const text = String(value);
+  return /[",\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+}
+
 export function generatePayrollSummary(
   employees: ExcelEmployeeRow[],
   calculatedPayrolls: Map<string, PayrollResult>,
@@ -55,48 +64,65 @@ export function generatePayrollSummary(
     const payroll = calculatedPayrolls.get(employee.name);
     if (!payroll) continue;
 
-    const disbursement = employee.disbursementType === "Cash" ? "CASH" : "ONLINE";
+    const cash = employee.disbursementType === "Cash" ? "CASH" : "";
+    const deMinimisBiMonthly = sheetOrFallback(employee.deMinimisBiMonthly, employee.deminimis / 2);
+    const basicPay = sheetOrFallback(employee.basicPay, payroll.regularPay);
+    const leaves = sheetOrFallback(employee.totalLeavesPay, payroll.silPay + payroll.slPay);
+    const ot = sheetOrFallback(employee.otTotalPay, payroll.overtimeRegularPay + payroll.overtimeExtendedPay);
+    const aot = sheetOrFallback(employee.aotPay, 0);
+    const holidayPay = sheetOrFallback(employee.totalHolidayPay, 0);
+    const otPercentage = sheetOrFallback(employee.extraOtPremium, 0);
+    const coAhop = sheetOrFallback(employee.coAhop, payroll.ahopTopup);
+    const tardinessUndertime = sheetOrFallback(employee.tardinessDeduction, -Math.abs(payroll.tardinessDeduction));
+    const absence = sheetOrFallback(employee.absenceDeduction, -Math.abs(payroll.absencePay));
+    const salaryAdjustments = sheetOrFallback(employee.salaryAdjustments, payroll.salaryAdjustments);
+    const grossIncome = sheetOrFallback(employee.grossIncome, payroll.grossWithAhop);
+    const sss = sheetOrFallback(employee.sss, payroll.sssEmployee);
+    const philhealth = sheetOrFallback(employee.philHealth, payroll.philHealthEmployee);
+    const pagibig = sheetOrFallback(employee.pagIbig, payroll.pagIbigEmployee);
+    const withholdingTax = sheetOrFallback(employee.withholdingTax, 0);
+    const loans = sheetOrFallback(employee.loans, payroll.loanDeductions);
     const totalDeductionsForEmployee =
-      payroll.sssEmployee +
-      payroll.philHealthEmployee +
-      payroll.pagIbigEmployee +
-      payroll.probationaryDeduction +
-      payroll.tardinessDeduction +
-      payroll.loanDeductions;
+      sss +
+      philhealth +
+      pagibig +
+      withholdingTax +
+      loans;
+    const netIncome = grossIncome + salaryAdjustments - totalDeductionsForEmployee;
 
     const row: PayrollSummaryRow = {
-      disbursementMethod: disbursement,
+      cash,
       employeeName: employee.name,
       position: employee.position,
       dateOfJoining: employee.dateOfJoining ? employee.dateOfJoining.toISOString().split("T")[0] : "N/A",
-      basicPay: payroll.regularPay,
-      leaves: payroll.silPay + payroll.slPay,
-      overtimeRegular: payroll.overtimeRegularPay,
-      overtimeExtended: payroll.overtimeExtendedPay,
-      anotherOT: 0, // Placeholder for additional OT types
-      accumulatedHoliday: payroll.ahopTopup,
-      otPercentage: payroll.overtimeRegularPay > 0 ? 100 : 0, // Percentage indicator
-      coAhop: 0, // Company contribution AHOP (if applicable)
-      deminimis: employee.deminimis,
-      tardinessUndertime: payroll.tardinessDeduction,
-      absence: -payroll.absencePay, // Shown as deduction
-      salaryAdjustments: payroll.salaryAdjustments,
-      grossIncome: payroll.grossWithAhop,
-      sss: payroll.sssEmployee,
-      philhealth: payroll.philHealthEmployee,
-      pagibig: payroll.pagIbigEmployee,
-      withholdingTax: 0, // Not yet calculated
-      loans: payroll.loanDeductions,
+      salaryDisbursementType: employee.disbursementType,
+      basicPay,
+      leaves,
+      ot,
+      aot,
+      holidayPay,
+      otPercentage,
+      coAhop,
+      deminimis: deMinimisBiMonthly,
+      tardinessUndertime,
+      absence,
+      salaryAdjustments,
+      grossIncome,
+      sss,
+      philhealth,
+      pagibig,
+      withholdingTax,
+      loans,
       totalDeductions: totalDeductionsForEmployee,
-      netIncome: payroll.netPay,
-      previousYtdAhop: employee.deminimis, // Placeholder
+      netIncome,
+      previousYtdAhop: payroll.ytdAhop - coAhop,
       ytdAhop: payroll.ytdAhop,
     };
 
     rows.push(row);
-    totalGrossIncome += payroll.grossWithAhop;
+    totalGrossIncome += grossIncome;
     totalDeductions += totalDeductionsForEmployee;
-    totalNetIncome += payroll.netPay;
+    totalNetIncome += netIncome;
   }
 
   return {
@@ -112,46 +138,46 @@ export function generatePayrollSummary(
 
 export function exportPayrollToCSV(summary: PayrollSummary): string {
   const headers = [
-    "Disbursement Method",
+    "CASH",
     "Employee Name",
     "Position",
     "Date of Joining",
+    "Salary Disbursement Type",
     "Basic Pay",
     "Leaves",
-    "Overtime (Regular)",
-    "Overtime (Extended)",
-    "Another OT",
-    "Accumulated Holiday",
+    "OT",
+    "AOT",
+    "AH",
     "OT %",
     "CO AHOP",
     "De Minimis",
     "Tardiness/Undertime",
     "Absence",
-    "Salary Adjustments",
+    "Salary adjustments/SIL Conversion",
     "Gross Income",
     "SSS",
     "Philhealth",
-    "Pag-ibig",
-    "Withholding Tax",
+    "Pagibig",
+    "W/Holding Tax",
     "Loans",
-    "Total Deductions",
+    "Total",
     "Net Income",
-    "Previous YTD AHOP",
+    "Previous Pay Period's YTD AHOP",
     "YTD AHOP",
   ];
 
   const rows = summary.rows.map((row) => [
-    row.disbursementMethod,
+    row.cash,
     row.employeeName,
     row.position,
     row.dateOfJoining,
+    row.salaryDisbursementType,
     row.basicPay.toFixed(2),
     row.leaves.toFixed(2),
-    row.overtimeRegular.toFixed(2),
-    row.overtimeExtended.toFixed(2),
-    row.anotherOT.toFixed(2),
-    row.accumulatedHoliday.toFixed(2),
-    row.otPercentage,
+    row.ot.toFixed(2),
+    row.aot.toFixed(2),
+    row.holidayPay.toFixed(2),
+    row.otPercentage.toFixed(2),
     row.coAhop.toFixed(2),
     row.deminimis.toFixed(2),
     row.tardinessUndertime.toFixed(2),
@@ -177,8 +203,8 @@ export function exportPayrollToCSV(summary: PayrollSummary): string {
     : "Unknown";
 
   const csv = [
-    headers.join(","),
-    ...rows.map((row) => row.join(",")),
+    headers.map(csvCell).join(","),
+    ...rows.map((row) => row.map(csvCell).join(",")),
     "",
     `Period: ${startStr} to ${endStr}`,
     `Total Rows: ${summary.totalRows}`,

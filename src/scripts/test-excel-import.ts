@@ -98,7 +98,8 @@ async function main() {
       );
       console.log(`   Gross Income: ₱${row.grossIncome.toFixed(2)}`);
       console.log(`   Net Income: ₱${row.netIncome.toFixed(2)}`);
-      console.log(`   AHOP: ₱${row.accumulatedHoliday.toFixed(2)}`);
+      console.log(`   CO AHOP: ₱${row.coAhop.toFixed(2)}`);
+      console.log(`   De Minimis: ₱${row.deminimis.toFixed(2)}`);
       console.log(`   YTD AHOP: ₱${row.ytdAhop.toFixed(2)}`);
     }
 

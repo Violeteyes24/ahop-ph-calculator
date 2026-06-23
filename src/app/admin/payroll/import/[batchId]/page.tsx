@@ -25,6 +25,10 @@ function getDefaultLabel(periodStart: Date, periodEnd: Date): string {
   return `${start}-${end}`;
 }
 
+function formatNumber(value: number | undefined): string {
+  return Number(value ?? 0).toFixed(2);
+}
+
 export default async function PayrollImportPreviewPage({
   params,
 }: {
@@ -136,10 +140,16 @@ export default async function PayrollImportPreviewPage({
               <tr>
                 <th className="px-4 py-2 text-left text-xs font-semibold text-[#6b7280]">Name</th>
                 <th className="px-4 py-2 text-left text-xs font-semibold text-[#6b7280]">Position</th>
+                <th className="px-4 py-2 text-right text-xs font-semibold text-[#6b7280]">Worked hrs</th>
                 <th className="px-4 py-2 text-right text-xs font-semibold text-[#6b7280]">Days</th>
                 <th className="px-4 py-2 text-right text-xs font-semibold text-[#6b7280]">Daily</th>
                 <th className="px-4 py-2 text-right text-xs font-semibold text-[#6b7280]">Monthly</th>
                 <th className="px-4 py-2 text-right text-xs font-semibold text-[#6b7280]">OT hrs</th>
+                <th className="px-4 py-2 text-right text-xs font-semibold text-[#6b7280]">Tardy min</th>
+                <th className="px-4 py-2 text-right text-xs font-semibold text-[#6b7280]">Tardy ded.</th>
+                <th className="px-4 py-2 text-right text-xs font-semibold text-[#6b7280]">Loans</th>
+                <th className="px-4 py-2 text-right text-xs font-semibold text-[#6b7280]">Adjustments</th>
+                <th className="px-4 py-2 text-right text-xs font-semibold text-[#6b7280]">Sheet gross</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#f0ebe3]">
@@ -147,12 +157,18 @@ export default async function PayrollImportPreviewPage({
                 <tr key={`${employee.name}-${employee.position}`} className="hover:bg-[#faf8f4]">
                   <td className="px-4 py-2 font-medium text-[#1a2e1f]">{employee.name}</td>
                   <td className="px-4 py-2 text-[#6b7280]">{employee.position || "None"}</td>
-                  <td className="px-4 py-2 text-right text-[#374151]">{employee.workedDays}</td>
-                  <td className="px-4 py-2 text-right text-[#374151]">{employee.dailyRate.toFixed(2)}</td>
-                  <td className="px-4 py-2 text-right text-[#374151]">{employee.monthlyRate.toFixed(2)}</td>
+                  <td className="px-4 py-2 text-right text-[#374151]">{formatNumber(employee.workedHours)}</td>
+                  <td className="px-4 py-2 text-right text-[#374151]">{formatNumber(employee.workedDays)}</td>
+                  <td className="px-4 py-2 text-right text-[#374151]">{formatNumber(employee.dailyRate)}</td>
+                  <td className="px-4 py-2 text-right text-[#374151]">{formatNumber(employee.monthlyRate)}</td>
                   <td className="px-4 py-2 text-right text-[#374151]">
-                    {(employee.rdOtHours + employee.extendedOtHours).toFixed(2)}
+                    {formatNumber((employee.rdOtHours ?? 0) + (employee.extendedOtHours ?? 0))}
                   </td>
+                  <td className="px-4 py-2 text-right text-[#374151]">{formatNumber(employee.tardinessMinutes)}</td>
+                  <td className="px-4 py-2 text-right text-[#374151]">{formatNumber(employee.tardinessDeduction)}</td>
+                  <td className="px-4 py-2 text-right text-[#374151]">{formatNumber(employee.loans)}</td>
+                  <td className="px-4 py-2 text-right text-[#374151]">{formatNumber(employee.salaryAdjustments)}</td>
+                  <td className="px-4 py-2 text-right text-[#374151]">{formatNumber(employee.grossIncome)}</td>
                 </tr>
               ))}
             </tbody>

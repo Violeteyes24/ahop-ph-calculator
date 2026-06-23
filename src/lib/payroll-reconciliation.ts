@@ -59,6 +59,10 @@ function trackDifference(
   });
 }
 
+function hasSheetValue(value: number | undefined): boolean {
+  return value !== undefined && Number.isFinite(value) && value !== 0;
+}
+
 export function reconcilePayroll(
   employees: ExcelEmployeeRow[],
   calculatedPayrolls: Map<string, PayrollResult>,
@@ -128,9 +132,10 @@ export function reconcilePayroll(
       trackDifference(employeeDifferences, employee.name, "slPay", employee.slPay, calculated.slPay);
     }
 
-    // Total gross income reconciliation
-    const excelGrossTotal =
-      employee.basicPay + employee.rdOtPay + employee.extendedOtPay + employee.silPay + employee.slPay;
+    // Total gross income reconciliation. Prefer the template's AS Gross Income when parsed.
+    const excelGrossTotal = hasSheetValue(employee.grossIncome)
+      ? employee.grossIncome
+      : employee.basicPay + employee.rdOtPay + employee.extendedOtPay + employee.silPay + employee.slPay;
     if (Math.abs(calculated.grossWithAhop - excelGrossTotal) > TOLERANCE_ABS) {
       trackDifference(
         employeeDifferences,
@@ -142,8 +147,57 @@ export function reconcilePayroll(
       grossIncomeDifference += calculated.grossWithAhop - excelGrossTotal;
     }
 
-    // Deductions reconciliation (if we have Excel values)
-    // Note: Excel deductions depend on formulas; we're comparing computational results
+    if (hasSheetValue(employee.tardinessDeduction)) {
+      const excelTardinessDeduction = Math.abs(employee.tardinessDeduction);
+      if (Math.abs(calculated.tardinessDeduction - excelTardinessDeduction) > TOLERANCE_ABS) {
+        trackDifference(
+          employeeDifferences,
+          employee.name,
+          "tardinessDeduction",
+          excelTardinessDeduction,
+          calculated.tardinessDeduction
+        );
+      }
+    }
+
+    if (hasSheetValue(employee.loans) && Math.abs(calculated.loanDeductions - Math.abs(employee.loans)) > TOLERANCE_ABS) {
+      trackDifference(
+        employeeDifferences,
+        employee.name,
+        "loans",
+        Math.abs(employee.loans),
+        calculated.loanDeductions
+      );
+    }
+
+    const excelDeductions =
+      (employee.sss || 0) +
+      (employee.philHealth || 0) +
+      (employee.pagIbig || 0) +
+      (employee.withholdingTax || 0) +
+      (employee.loans || 0);
+    if (hasSheetValue(excelDeductions)) {
+      const calculatedDeductions =
+        calculated.sssEmployee +
+        calculated.philHealthEmployee +
+        calculated.pagIbigEmployee +
+        calculated.loanDeductions;
+      if (Math.abs(calculatedDeductions - excelDeductions) > TOLERANCE_ABS) {
+        trackDifference(
+          employeeDifferences,
+          employee.name,
+          "statutoryAndLoanDeductions",
+          excelDeductions,
+          calculatedDeductions
+        );
+      }
+    }
+
+    const excelNetPay = excelGrossTotal + (employee.salaryAdjustments || 0) - excelDeductions;
+    if (hasSheetValue(employee.grossIncome) && Math.abs(calculated.netPay - excelNetPay) > TOLERANCE_ABS) {
+      trackDifference(employeeDifferences, employee.name, "netPay", excelNetPay, calculated.netPay);
+      netPayDifference += calculated.netPay - excelNetPay;
+    }
 
     if (employeeDifferences.length === 0) {
       matchedEmployees++;
@@ -151,8 +205,9 @@ export function reconcilePayroll(
       differences.push(...employeeDifferences);
     }
 
-    // Track net pay difference
-    netPayDifference += calculated.netPay;
+    if (!hasSheetValue(employee.grossIncome)) {
+      netPayDifference += calculated.netPay;
+    }
   }
 
   return {
