@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { calculatePayroll, HANDBOOK_REFERENCE, type SalaryType } from "@/lib/ahop";
 import { Badge } from "@/components/ui/badge";
@@ -355,6 +356,12 @@ export default function Home() {
           >
             Formula Walkthrough
           </button>
+          <Link
+            href="/login"
+            className="rounded-xl border border-[#c9c2b7] bg-white px-4 py-2 text-sm font-semibold text-[#254235] hover:bg-[#f7f4ef]"
+          >
+            Finance sign in
+          </Link>
         </div>
       </section>
 
