@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { calculatePayroll } from "@/lib/ahop";
 import { saveAttendanceAction, runPayrollAction } from "@/app/actions/payroll";
+import { calculatePayroll } from "@/lib/ahop";
 
 interface EntryRow {
   id: string;
@@ -14,19 +14,67 @@ interface EntryRow {
   dailyRate: number;
   monthlyRate: number;
   probationaryDeductionPct: number;
+  taxable: boolean;
   deminimisAmount: number;
   workingDays: number;
+  workedHours: number;
+  expectedWorkHours: number;
+  expectedWorkHoursPay: number;
+  scheduledWorkDays: number;
+  scheduledWorkDaysPay: number;
   overtimeRegularHours: number;
   overtimeExtendedHours: number;
   silDays: number;
   slHours: number;
   absenceHours: number;
+  absenceDeduction: number;
+  tardinessMinutes: number;
   tardinessDeduction: number;
+  aotMinutes: number;
+  aotPay: number;
+  extraOtPremium: number;
+  regularHolidayHours: number;
+  regularHolidayPay: number;
+  specialHolidayHours: number;
+  specialHolidayPay: number;
+  totalHolidayPay: number;
+  coAhop: number;
+  totalAhop: number;
+  withholdingTax: number;
+  sourceGrossIncome: number;
   loanDeductions: number;
   salaryAdjustments: number;
   notes: string;
   calculationError: string | null;
 }
+
+const NUMERIC_FIELDS: Array<{ key: keyof EntryRow; label: string; step?: number; min?: number }> = [
+  { key: "workingDays", label: "Days", step: 1 },
+  { key: "workedHours", label: "Worked hrs" },
+  { key: "expectedWorkHours", label: "Expected hrs" },
+  { key: "expectedWorkHoursPay", label: "Expected pay", step: 0.01 },
+  { key: "scheduledWorkDays", label: "Sched days" },
+  { key: "scheduledWorkDaysPay", label: "Sched pay", step: 0.01 },
+  { key: "overtimeRegularHours", label: "OT Reg hrs" },
+  { key: "overtimeExtendedHours", label: "OT Ext hrs" },
+  { key: "silDays", label: "SIL days" },
+  { key: "slHours", label: "SL hrs" },
+  { key: "absenceHours", label: "Absent hrs" },
+  { key: "absenceDeduction", label: "Absent amt", step: 0.01, min: -999999 },
+  { key: "tardinessMinutes", label: "Tardy min" },
+  { key: "tardinessDeduction", label: "Tardiness", step: 0.01 },
+  { key: "aotMinutes", label: "AOT min" },
+  { key: "aotPay", label: "AOT amt", step: 0.01 },
+  { key: "extraOtPremium", label: "OT pct", step: 0.01 },
+  { key: "regularHolidayHours", label: "Reg hol hrs" },
+  { key: "regularHolidayPay", label: "Reg hol amt", step: 0.01 },
+  { key: "specialHolidayHours", label: "Spec hol hrs" },
+  { key: "specialHolidayPay", label: "Spec hol amt", step: 0.01 },
+  { key: "coAhop", label: "CO AHOP", step: 0.01 },
+  { key: "withholdingTax", label: "W/H Tax", step: 0.01 },
+  { key: "loanDeductions", label: "Loans", step: 0.01 },
+  { key: "salaryAdjustments", label: "Adj", step: 0.01, min: -999999 },
+];
 
 function toPeso(value: number): string {
   return new Intl.NumberFormat("en-PH", {
@@ -52,7 +100,7 @@ export function AttendanceGrid({
 
   function updateEntry(employeeId: string, field: keyof EntryRow, value: number | string) {
     setEntries((prev) =>
-      prev.map((e) => (e.employeeId === employeeId ? { ...e, [field]: value } : e))
+      prev.map((entry) => (entry.employeeId === employeeId ? { ...entry, [field]: value } : entry))
     );
     setSaveStatus("idle");
   }
@@ -63,14 +111,34 @@ export function AttendanceGrid({
       dailyRate: entry.dailyRate,
       monthlyRate: entry.monthlyRate,
       workingDays: entry.workingDays,
+      workedHours: entry.workedHours,
       baselineDays,
       probationaryDeductionPct: entry.probationaryDeductionPct,
+      taxable: entry.taxable,
+      deMinimisPay: entry.deminimisAmount / 2,
+      expectedWorkHours: entry.expectedWorkHours,
+      expectedWorkHoursPay: entry.expectedWorkHoursPay,
+      scheduledWorkDays: entry.scheduledWorkDays,
+      scheduledWorkDaysPay: entry.scheduledWorkDaysPay,
       overtimeRegularHours: entry.overtimeRegularHours,
       overtimeExtendedHours: entry.overtimeExtendedHours,
       silDays: entry.silDays,
       slHours: entry.slHours,
       absenceHours: entry.absenceHours,
+      absenceDeduction: entry.absenceDeduction,
+      tardinessMinutes: entry.tardinessMinutes,
       tardinessDeduction: entry.tardinessDeduction,
+      aotMinutes: entry.aotMinutes,
+      aotPay: entry.aotPay,
+      extraOtPremium: entry.extraOtPremium,
+      regularHolidayHours: entry.regularHolidayHours,
+      regularHolidayPay: entry.regularHolidayPay,
+      specialHolidayHours: entry.specialHolidayHours,
+      specialHolidayPay: entry.specialHolidayPay,
+      totalHolidayPay: entry.totalHolidayPay,
+      coAhop: entry.coAhop,
+      totalAhop: entry.totalAhop,
+      withholdingTax: entry.withholdingTax,
       loanDeductions: entry.loanDeductions,
       salaryAdjustments: entry.salaryAdjustments,
     });
@@ -80,18 +148,37 @@ export function AttendanceGrid({
     setSaveStatus("saving");
     const result = await saveAttendanceAction(
       periodId,
-      entries.map((e) => ({
-        employeeId: e.employeeId,
-        workingDays: e.workingDays,
-        overtimeRegularHours: e.overtimeRegularHours,
-        overtimeExtendedHours: e.overtimeExtendedHours,
-        silDays: e.silDays,
-        slHours: e.slHours,
-        absenceHours: e.absenceHours,
-        tardinessDeduction: e.tardinessDeduction,
-        loanDeductions: e.loanDeductions,
-        salaryAdjustments: e.salaryAdjustments,
-        notes: e.notes,
+      entries.map((entry) => ({
+        employeeId: entry.employeeId,
+        workingDays: entry.workingDays,
+        workedHours: entry.workedHours,
+        expectedWorkHours: entry.expectedWorkHours,
+        expectedWorkHoursPay: entry.expectedWorkHoursPay,
+        scheduledWorkDays: entry.scheduledWorkDays,
+        scheduledWorkDaysPay: entry.scheduledWorkDaysPay,
+        overtimeRegularHours: entry.overtimeRegularHours,
+        overtimeExtendedHours: entry.overtimeExtendedHours,
+        silDays: entry.silDays,
+        slHours: entry.slHours,
+        absenceHours: entry.absenceHours,
+        absenceDeduction: entry.absenceDeduction,
+        tardinessMinutes: entry.tardinessMinutes,
+        tardinessDeduction: entry.tardinessDeduction,
+        aotMinutes: entry.aotMinutes,
+        aotPay: entry.aotPay,
+        extraOtPremium: entry.extraOtPremium,
+        regularHolidayHours: entry.regularHolidayHours,
+        regularHolidayPay: entry.regularHolidayPay,
+        specialHolidayHours: entry.specialHolidayHours,
+        specialHolidayPay: entry.specialHolidayPay,
+        totalHolidayPay: entry.totalHolidayPay,
+        coAhop: entry.coAhop,
+        totalAhop: entry.totalAhop,
+        withholdingTax: entry.withholdingTax,
+        sourceGrossIncome: entry.sourceGrossIncome,
+        loanDeductions: entry.loanDeductions,
+        salaryAdjustments: entry.salaryAdjustments,
+        notes: entry.notes,
       }))
     );
     setSaveStatus(result.success ? "saved" : "error");
@@ -119,7 +206,7 @@ export function AttendanceGrid({
           preview.philHealthEmployee +
           preview.pagIbigEmployee +
           preview.probationaryDeduction +
-          preview.tardinessDeduction +
+          preview.withholdingTax +
           preview.loanDeductions,
       };
     },
@@ -128,26 +215,15 @@ export function AttendanceGrid({
 
   return (
     <div>
-      {/* Summary bar */}
       <div className="mb-4 grid grid-cols-3 gap-3">
-        <div className="rounded-xl border border-[#ddd6ca] bg-white px-4 py-3">
-          <p className="text-xs text-[#6b7280]">Total gross (preview)</p>
-          <p className="mt-1 text-lg font-semibold text-[#1a2e1f]">{toPeso(totals.gross)}</p>
-        </div>
-        <div className="rounded-xl border border-[#ddd6ca] bg-white px-4 py-3">
-          <p className="text-xs text-[#6b7280]">Total deductions (preview)</p>
-          <p className="mt-1 text-lg font-semibold text-[#1a2e1f]">{toPeso(totals.deductions)}</p>
-        </div>
-        <div className="rounded-xl border border-[#ddd6ca] bg-[#edf3ee] px-4 py-3">
-          <p className="text-xs text-[#5c665f]">Total net pay (preview)</p>
-          <p className="mt-1 text-lg font-semibold text-[#1a2e1f]">{toPeso(totals.net)}</p>
-        </div>
+        <SummaryCard label="Total gross (preview)" value={toPeso(totals.gross)} />
+        <SummaryCard label="Total deductions (preview)" value={toPeso(totals.deductions)} />
+        <SummaryCard label="Total net pay (preview)" value={toPeso(totals.net)} highlight />
       </div>
 
-      {/* Action bar */}
       <div className="mb-4 flex items-center justify-between">
         <p className="text-xs text-[#9ca3af]">
-          Values update in real-time as you type. Save your progress before running payroll.
+          Values update in real time as you type. Save your progress before running payroll.
         </p>
         <div className="flex gap-2">
           <button
@@ -156,11 +232,7 @@ export function AttendanceGrid({
             disabled={saveStatus === "saving"}
             className="rounded-lg border border-[#d1d5db] bg-white px-4 py-2 text-sm font-medium text-[#374151] hover:bg-[#f5f0e8] disabled:opacity-60"
           >
-            {saveStatus === "saving"
-              ? "Saving…"
-              : saveStatus === "saved"
-              ? "Saved ✓"
-              : "Save draft"}
+            {saveStatus === "saving" ? "Saving..." : saveStatus === "saved" ? "Saved" : "Save draft"}
           </button>
           <button
             type="button"
@@ -168,7 +240,7 @@ export function AttendanceGrid({
             disabled={isRunning}
             className="rounded-lg bg-[#2f4f3e] px-4 py-2 text-sm font-semibold text-white hover:bg-[#274636] disabled:opacity-60"
           >
-            {isRunning ? "Running payroll…" : "Run payroll"}
+            {isRunning ? "Running payroll..." : "Run payroll"}
           </button>
         </div>
       </div>
@@ -177,7 +249,6 @@ export function AttendanceGrid({
         <p className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{runError}</p>
       ) : null}
 
-      {/* Grid */}
       <div className="overflow-x-auto rounded-xl border border-[#ddd6ca] bg-white">
         <table className="w-full text-xs">
           <thead className="border-b border-[#ddd6ca] bg-[#f5f0e8]">
@@ -185,15 +256,11 @@ export function AttendanceGrid({
               <th className="sticky left-0 bg-[#f5f0e8] px-3 py-3 text-left font-semibold text-[#374151]">
                 Employee
               </th>
-              <th className="px-3 py-3 text-right font-semibold text-[#374151]">Days</th>
-              <th className="px-3 py-3 text-right font-semibold text-[#374151]">OT Reg hrs</th>
-              <th className="px-3 py-3 text-right font-semibold text-[#374151]">OT Ext hrs</th>
-              <th className="px-3 py-3 text-right font-semibold text-[#374151]">SIL days</th>
-              <th className="px-3 py-3 text-right font-semibold text-[#374151]">SL hrs</th>
-              <th className="px-3 py-3 text-right font-semibold text-[#374151]">Absent hrs</th>
-              <th className="px-3 py-3 text-right font-semibold text-[#374151]">Tardiness ₱</th>
-              <th className="px-3 py-3 text-right font-semibold text-[#374151]">Loans ₱</th>
-              <th className="px-3 py-3 text-right font-semibold text-[#374151]">Adj ₱</th>
+              {NUMERIC_FIELDS.map((field) => (
+                <th key={String(field.key)} className="px-3 py-3 text-right font-semibold text-[#374151]">
+                  {field.label}
+                </th>
+              ))}
               <th className="px-3 py-3 text-right font-semibold text-[#2f4f3e]">Gross</th>
               <th className="px-3 py-3 text-right font-semibold text-[#2f4f3e]">Net Pay</th>
             </tr>
@@ -205,72 +272,19 @@ export function AttendanceGrid({
                 <tr key={entry.employeeId} className="hover:bg-[#faf8f4]">
                   <td className="sticky left-0 bg-white px-3 py-2">
                     <p className="font-medium text-[#1a2e1f]">{entry.employeeName}</p>
-                    {entry.position ? (
-                      <p className="text-[#9ca3af]">{entry.position}</p>
-                    ) : null}
-                    {entry.calculationError ? (
-                      <p className="text-red-600">{entry.calculationError}</p>
-                    ) : null}
+                    {entry.position ? <p className="text-[#9ca3af]">{entry.position}</p> : null}
+                    {entry.calculationError ? <p className="text-red-600">{entry.calculationError}</p> : null}
                   </td>
-                  <td className="px-2 py-1">
-                    <NumberInput
-                      value={entry.workingDays}
-                      onChange={(v) => updateEntry(entry.employeeId, "workingDays", v)}
-                      step={1}
-                      min={0}
-                    />
-                  </td>
-                  <td className="px-2 py-1">
-                    <NumberInput
-                      value={entry.overtimeRegularHours}
-                      onChange={(v) => updateEntry(entry.employeeId, "overtimeRegularHours", v)}
-                    />
-                  </td>
-                  <td className="px-2 py-1">
-                    <NumberInput
-                      value={entry.overtimeExtendedHours}
-                      onChange={(v) => updateEntry(entry.employeeId, "overtimeExtendedHours", v)}
-                    />
-                  </td>
-                  <td className="px-2 py-1">
-                    <NumberInput
-                      value={entry.silDays}
-                      onChange={(v) => updateEntry(entry.employeeId, "silDays", v)}
-                    />
-                  </td>
-                  <td className="px-2 py-1">
-                    <NumberInput
-                      value={entry.slHours}
-                      onChange={(v) => updateEntry(entry.employeeId, "slHours", v)}
-                    />
-                  </td>
-                  <td className="px-2 py-1">
-                    <NumberInput
-                      value={entry.absenceHours}
-                      onChange={(v) => updateEntry(entry.employeeId, "absenceHours", v)}
-                    />
-                  </td>
-                  <td className="px-2 py-1">
-                    <NumberInput
-                      value={entry.tardinessDeduction}
-                      onChange={(v) => updateEntry(entry.employeeId, "tardinessDeduction", v)}
-                      step={0.01}
-                    />
-                  </td>
-                  <td className="px-2 py-1">
-                    <NumberInput
-                      value={entry.loanDeductions}
-                      onChange={(v) => updateEntry(entry.employeeId, "loanDeductions", v)}
-                      step={0.01}
-                    />
-                  </td>
-                  <td className="px-2 py-1">
-                    <NumberInput
-                      value={entry.salaryAdjustments}
-                      onChange={(v) => updateEntry(entry.employeeId, "salaryAdjustments", v)}
-                      step={0.01}
-                    />
-                  </td>
+                  {NUMERIC_FIELDS.map((field) => (
+                    <td key={String(field.key)} className="px-2 py-1">
+                      <NumberInput
+                        value={Number(entry[field.key])}
+                        onChange={(value) => updateEntry(entry.employeeId, field.key, value)}
+                        step={field.step}
+                        min={field.min}
+                      />
+                    </td>
+                  ))}
                   <td className="px-3 py-2 text-right font-medium text-[#374151]">
                     {toPeso(preview.grossWithAhop)}
                   </td>
@@ -285,8 +299,21 @@ export function AttendanceGrid({
       </div>
 
       <p className="mt-3 text-xs text-[#9ca3af]">
-        Gross and Net Pay columns are live previews using the AHOP calculation engine. Run payroll to persist the results.
+        Imported template fields are preserved here. Run payroll to persist them into payroll snapshots.
       </p>
+    </div>
+  );
+}
+
+function SummaryCard({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) {
+  return (
+    <div
+      className={`rounded-xl border px-4 py-3 ${
+        highlight ? "border-[#c3d9c9] bg-[#edf3ee]" : "border-[#ddd6ca] bg-white"
+      }`}
+    >
+      <p className="text-xs text-[#6b7280]">{label}</p>
+      <p className="mt-1 text-lg font-semibold text-[#1a2e1f]">{value}</p>
     </div>
   );
 }
@@ -298,7 +325,7 @@ function NumberInput({
   min = 0,
 }: {
   value: number;
-  onChange: (v: number) => void;
+  onChange: (value: number) => void;
   step?: number;
   min?: number;
 }) {
@@ -308,7 +335,7 @@ function NumberInput({
       value={value}
       min={min}
       step={step}
-      onChange={(e) => onChange(parseFloat(e.target.value) || 0)}
+      onChange={(event) => onChange(parseFloat(event.target.value) || 0)}
       className="w-20 rounded border border-[#e5e7eb] px-2 py-1 text-right text-xs outline-none focus:border-[#2f4f3e] focus:ring-1 focus:ring-[#2f4f3e]"
     />
   );

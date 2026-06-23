@@ -20,6 +20,7 @@ export interface TemplatePayslipSnapshot {
   regularPay: MoneyLike;
   ahopTopup: MoneyLike;
   grossWithAhop: MoneyLike;
+  deMinimisPay?: MoneyLike;
   sssEmployee: MoneyLike;
   sssEmployer?: MoneyLike;
   philHealthEmployee: MoneyLike;
@@ -32,13 +33,30 @@ export interface TemplatePayslipSnapshot {
   overtimeExtendedHours: MoneyLike;
   overtimeRegularPay: MoneyLike;
   overtimeExtendedPay: MoneyLike;
+  otTotalHours?: MoneyLike;
+  otTotalPay?: MoneyLike;
   silDays: MoneyLike;
   silPay: MoneyLike;
   slHours: MoneyLike;
   slPay: MoneyLike;
+  totalLeaves?: MoneyLike;
+  totalLeavesPay?: MoneyLike;
   absenceHours: MoneyLike;
   absencePay: MoneyLike;
+  absenceDeduction?: MoneyLike;
+  tardinessMinutes?: MoneyLike;
   tardinessDeduction: MoneyLike;
+  aotMinutes?: MoneyLike;
+  aotPay?: MoneyLike;
+  extraOtPremium?: MoneyLike;
+  regularHolidayHours?: MoneyLike;
+  regularHolidayPay?: MoneyLike;
+  specialHolidayHours?: MoneyLike;
+  specialHolidayPay?: MoneyLike;
+  totalHolidayPay?: MoneyLike;
+  coAhop?: MoneyLike;
+  totalAhop?: MoneyLike;
+  withholdingTax?: MoneyLike;
   loanDeductions: MoneyLike;
   salaryAdjustments: MoneyLike;
   ytdAhop: MoneyLike;
@@ -155,10 +173,10 @@ function PayslipCopy({
         </TableBlock>
 
         <TableBlock title="AHOP">
-          <Line label="Overtime %" quantity="" value={toPeso(0)} />
-          <Line label="Overtime" quantity="" value={toPeso(0)} />
-          <Line label="Holiday" quantity="" value={toPeso(0)} />
-          <Line label="Extra" quantity="" value={toPeso(snapshot.ahopTopup)} />
+          <Line label="Overtime %" quantity="" value={toPeso(snapshot.extraOtPremium)} />
+          <Line label="Overtime" quantity={formatQty(amount(snapshot.aotMinutes))} value={toPeso(snapshot.aotPay)} />
+          <Line label="Holiday" quantity="" value={toPeso(snapshot.totalHolidayPay)} />
+          <Line label="Extra" quantity="" value={toPeso(snapshot.coAhop)} />
           <Line label="YTD AHOP" quantity="" value={toPeso(snapshot.ytdAhop)} strong />
         </TableBlock>
 
@@ -166,7 +184,7 @@ function PayslipCopy({
           <Line label="SSS" quantity="" value={toPeso(snapshot.sssEmployee)} />
           <Line label="PhilHealth" quantity="" value={toPeso(snapshot.philHealthEmployee)} />
           <Line label="Pagibig" quantity="" value={toPeso(snapshot.pagIbigEmployee)} />
-          <Line label="W/Holding Tax" quantity="" value={toPeso(0)} />
+          <Line label="W/Holding Tax" quantity="" value={toPeso(snapshot.withholdingTax)} />
           <Line label="Loans" quantity="" value={toPeso(snapshot.loanDeductions)} />
           {probationaryDeduction > 0 ? (
             <Line label="Probationary deduction" quantity="" value={toPeso(probationaryDeduction)} />
@@ -193,24 +211,26 @@ function PayslipCopy({
 
 function getPayslipDerivedValues(employee: TemplatePayslipEmployee, snapshot: TemplatePayslipSnapshot) {
   const deMinimisBiMonthly = amount(employee.deminimisAmount) / 2;
+  const snapshotDeMinimis = amount(snapshot.deMinimisPay);
   const tardinessAmount = -Math.abs(amount(snapshot.tardinessDeduction));
-  const absenceAmount = -Math.abs(amount(snapshot.absencePay));
-  const leavesPay = amount(snapshot.silPay) + amount(snapshot.slPay);
-  const leaveDays = amount(snapshot.silDays) + amount(snapshot.slHours) / 8;
+  const absenceAmount = amount(snapshot.absenceDeduction) || -Math.abs(amount(snapshot.absencePay));
+  const leavesPay = amount(snapshot.totalLeavesPay) || amount(snapshot.silPay) + amount(snapshot.slPay);
+  const leaveDays = amount(snapshot.totalLeaves) || amount(snapshot.silDays) + amount(snapshot.slHours) / 8;
   const absenceDays = amount(snapshot.absenceHours) / 8;
-  const otHours = amount(snapshot.overtimeRegularHours) + amount(snapshot.overtimeExtendedHours);
-  const otPay = amount(snapshot.overtimeRegularPay) + amount(snapshot.overtimeExtendedPay);
-  const grossIncome = amount(snapshot.grossWithAhop) + deMinimisBiMonthly - Math.abs(amount(snapshot.tardinessDeduction));
+  const otHours = amount(snapshot.otTotalHours) || amount(snapshot.overtimeRegularHours) + amount(snapshot.overtimeExtendedHours);
+  const otPay = amount(snapshot.otTotalPay) || amount(snapshot.overtimeRegularPay) + amount(snapshot.overtimeExtendedPay);
+  const grossIncome = amount(snapshot.grossWithAhop);
   const totalDeductions =
     amount(snapshot.sssEmployee) +
     amount(snapshot.philHealthEmployee) +
     amount(snapshot.pagIbigEmployee) +
+    amount(snapshot.withholdingTax) +
     amount(snapshot.loanDeductions) +
     amount(snapshot.probationaryDeduction);
   const netPay = grossIncome + amount(snapshot.salaryAdjustments) - totalDeductions;
 
   return {
-    deMinimisBiMonthly,
+    deMinimisBiMonthly: snapshotDeMinimis || deMinimisBiMonthly,
     tardinessAmount,
     absenceAmount,
     leavesPay,

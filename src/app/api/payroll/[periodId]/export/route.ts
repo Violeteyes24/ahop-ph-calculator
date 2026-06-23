@@ -73,18 +73,16 @@ export async function GET(
 
   const rows = period.snapshots.map((snap) => {
     const emp = snap.employee;
-    const deMinimisBiMonthly = Number(emp.deminimisAmount) / 2;
+    const deMinimisBiMonthly = Number(snap.deMinimisPay);
     const tardinessUndertime = -Math.abs(Number(snap.tardinessDeduction));
-    const absence = -Math.abs(Number(snap.absencePay));
+    const absence = Number(snap.absenceDeduction) || -Math.abs(Number(snap.absencePay));
     const totalDeductions =
       Number(snap.sssEmployee) +
       Number(snap.philHealthEmployee) +
       Number(snap.pagIbigEmployee) +
+      Number(snap.withholdingTax) +
       Number(snap.loanDeductions);
-    const grossIncome =
-      Number(snap.grossWithAhop) +
-      deMinimisBiMonthly -
-      Math.abs(Number(snap.tardinessDeduction));
+    const grossIncome = Number(snap.grossWithAhop);
     const netIncome = grossIncome + Number(snap.salaryAdjustments) - totalDeductions;
 
     return [
@@ -94,12 +92,12 @@ export async function GET(
       emp.dateStarted.toISOString().split("T")[0],
       emp.paymentMethod === "CASH" ? "Cash" : "Online",
       Number(snap.regularPay).toFixed(2),
-      (Number(snap.silPay) + Number(snap.slPay)).toFixed(2),
-      (Number(snap.overtimeRegularPay) + Number(snap.overtimeExtendedPay)).toFixed(2),
-      "0.00",
-      "0.00",
-      "0.00",
-      Number(snap.ahopTopup).toFixed(2),
+      Number(snap.totalLeavesPay).toFixed(2),
+      Number(snap.otTotalPay).toFixed(2),
+      Number(snap.aotPay).toFixed(2),
+      Number(snap.totalHolidayPay).toFixed(2),
+      Number(snap.extraOtPremium).toFixed(2),
+      Number(snap.coAhop).toFixed(2),
       deMinimisBiMonthly.toFixed(2),
       tardinessUndertime.toFixed(2),
       absence.toFixed(2),
@@ -108,7 +106,7 @@ export async function GET(
       Number(snap.sssEmployee).toFixed(2),
       Number(snap.philHealthEmployee).toFixed(2),
       Number(snap.pagIbigEmployee).toFixed(2),
-      "0.00",
+      Number(snap.withholdingTax).toFixed(2),
       Number(snap.loanDeductions).toFixed(2),
       totalDeductions.toFixed(2),
       netIncome.toFixed(2),
@@ -119,31 +117,25 @@ export async function GET(
 
   const periodStartStr = period.periodStart.toISOString().split("T")[0];
   const periodEndStr = period.periodEnd.toISOString().split("T")[0];
-  const totalGross = period.snapshots.reduce((sum, snap) => {
-    const deMinimisBiMonthly = Number(snap.employee.deminimisAmount) / 2;
-    return sum + Number(snap.grossWithAhop) + deMinimisBiMonthly - Math.abs(Number(snap.tardinessDeduction));
-  }, 0);
+  const totalGross = period.snapshots.reduce((sum, snap) => sum + Number(snap.grossWithAhop), 0);
   const totalDed = period.snapshots.reduce(
     (sum, snap) =>
       sum +
       Number(snap.sssEmployee) +
       Number(snap.philHealthEmployee) +
       Number(snap.pagIbigEmployee) +
+      Number(snap.withholdingTax) +
       Number(snap.loanDeductions),
     0
   );
   const totalNet = period.snapshots.reduce((sum, snap) => {
-    const deMinimisBiMonthly = Number(snap.employee.deminimisAmount) / 2;
     const totalDeductions =
       Number(snap.sssEmployee) +
       Number(snap.philHealthEmployee) +
       Number(snap.pagIbigEmployee) +
+      Number(snap.withholdingTax) +
       Number(snap.loanDeductions);
-    const grossIncome =
-      Number(snap.grossWithAhop) +
-      deMinimisBiMonthly -
-      Math.abs(Number(snap.tardinessDeduction));
-    return sum + grossIncome + Number(snap.salaryAdjustments) - totalDeductions;
+    return sum + Number(snap.grossWithAhop) + Number(snap.salaryAdjustments) - totalDeductions;
   }, 0);
 
   const csv = [

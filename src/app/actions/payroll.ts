@@ -69,12 +69,31 @@ export async function saveAttendanceAction(
   entries: Array<{
     employeeId: string;
     workingDays: number;
+    workedHours: number;
+    expectedWorkHours: number;
+    expectedWorkHoursPay: number;
+    scheduledWorkDays: number;
+    scheduledWorkDaysPay: number;
     overtimeRegularHours: number;
     overtimeExtendedHours: number;
     silDays: number;
     slHours: number;
     absenceHours: number;
+    absenceDeduction: number;
+    tardinessMinutes: number;
     tardinessDeduction: number;
+    aotMinutes: number;
+    aotPay: number;
+    extraOtPremium: number;
+    regularHolidayHours: number;
+    regularHolidayPay: number;
+    specialHolidayHours: number;
+    specialHolidayPay: number;
+    totalHolidayPay: number;
+    coAhop: number;
+    totalAhop: number;
+    withholdingTax: number;
+    sourceGrossIncome: number;
     loanDeductions: number;
     salaryAdjustments: number;
     notes: string;
@@ -97,12 +116,31 @@ export async function saveAttendanceAction(
         },
         update: {
           workingDays: entry.workingDays,
+          workedHours: entry.workedHours,
+          expectedWorkHours: entry.expectedWorkHours,
+          expectedWorkHoursPay: entry.expectedWorkHoursPay,
+          scheduledWorkDays: entry.scheduledWorkDays,
+          scheduledWorkDaysPay: entry.scheduledWorkDaysPay,
           overtimeRegularHours: entry.overtimeRegularHours,
           overtimeExtendedHours: entry.overtimeExtendedHours,
           silDays: entry.silDays,
           slHours: entry.slHours,
           absenceHours: entry.absenceHours,
+          absenceDeduction: entry.absenceDeduction,
+          tardinessMinutes: entry.tardinessMinutes,
           tardinessDeduction: entry.tardinessDeduction,
+          aotMinutes: entry.aotMinutes,
+          aotPay: entry.aotPay,
+          extraOtPremium: entry.extraOtPremium,
+          regularHolidayHours: entry.regularHolidayHours,
+          regularHolidayPay: entry.regularHolidayPay,
+          specialHolidayHours: entry.specialHolidayHours,
+          specialHolidayPay: entry.specialHolidayPay,
+          totalHolidayPay: entry.totalHolidayPay,
+          coAhop: entry.coAhop,
+          totalAhop: entry.totalAhop,
+          withholdingTax: entry.withholdingTax,
+          sourceGrossIncome: entry.sourceGrossIncome,
           loanDeductions: entry.loanDeductions,
           salaryAdjustments: entry.salaryAdjustments,
           notes: entry.notes,
@@ -111,12 +149,31 @@ export async function saveAttendanceAction(
           periodId,
           employeeId: entry.employeeId,
           workingDays: entry.workingDays,
+          workedHours: entry.workedHours,
+          expectedWorkHours: entry.expectedWorkHours,
+          expectedWorkHoursPay: entry.expectedWorkHoursPay,
+          scheduledWorkDays: entry.scheduledWorkDays,
+          scheduledWorkDaysPay: entry.scheduledWorkDaysPay,
           overtimeRegularHours: entry.overtimeRegularHours,
           overtimeExtendedHours: entry.overtimeExtendedHours,
           silDays: entry.silDays,
           slHours: entry.slHours,
           absenceHours: entry.absenceHours,
+          absenceDeduction: entry.absenceDeduction,
+          tardinessMinutes: entry.tardinessMinutes,
           tardinessDeduction: entry.tardinessDeduction,
+          aotMinutes: entry.aotMinutes,
+          aotPay: entry.aotPay,
+          extraOtPremium: entry.extraOtPremium,
+          regularHolidayHours: entry.regularHolidayHours,
+          regularHolidayPay: entry.regularHolidayPay,
+          specialHolidayHours: entry.specialHolidayHours,
+          specialHolidayPay: entry.specialHolidayPay,
+          totalHolidayPay: entry.totalHolidayPay,
+          coAhop: entry.coAhop,
+          totalAhop: entry.totalAhop,
+          withholdingTax: entry.withholdingTax,
+          sourceGrossIncome: entry.sourceGrossIncome,
           loanDeductions: entry.loanDeductions,
           salaryAdjustments: entry.salaryAdjustments,
           notes: entry.notes,
@@ -168,14 +225,34 @@ export async function runPayrollAction(periodId: string): Promise<{ success: boo
         dailyRate: Number(emp.dailyRate ?? 0),
         monthlyRate: Number(emp.monthlyRate ?? 0),
         workingDays: entry.workingDays,
+        workedHours: Number(entry.workedHours),
         baselineDays: period.baselineDays,
         probationaryDeductionPct: Number(emp.probationaryDeductionPct),
+        taxable: emp.taxable,
+        deMinimisPay: Number(emp.deminimisAmount) / 2,
+        expectedWorkHours: Number(entry.expectedWorkHours),
+        expectedWorkHoursPay: Number(entry.expectedWorkHoursPay),
+        scheduledWorkDays: Number(entry.scheduledWorkDays),
+        scheduledWorkDaysPay: Number(entry.scheduledWorkDaysPay),
         overtimeRegularHours: Number(entry.overtimeRegularHours),
         overtimeExtendedHours: Number(entry.overtimeExtendedHours),
         silDays: Number(entry.silDays),
         slHours: Number(entry.slHours),
         absenceHours: Number(entry.absenceHours),
+        absenceDeduction: Number(entry.absenceDeduction),
+        tardinessMinutes: Number(entry.tardinessMinutes),
         tardinessDeduction: Number(entry.tardinessDeduction),
+        aotMinutes: Number(entry.aotMinutes),
+        aotPay: Number(entry.aotPay),
+        extraOtPremium: Number(entry.extraOtPremium),
+        regularHolidayHours: Number(entry.regularHolidayHours),
+        regularHolidayPay: Number(entry.regularHolidayPay),
+        specialHolidayHours: Number(entry.specialHolidayHours),
+        specialHolidayPay: Number(entry.specialHolidayPay),
+        totalHolidayPay: Number(entry.totalHolidayPay),
+        coAhop: Number(entry.coAhop),
+        totalAhop: Number(entry.totalAhop),
+        withholdingTax: Number(entry.withholdingTax),
         loanDeductions: Number(entry.loanDeductions),
         salaryAdjustments: Number(entry.salaryAdjustments),
         previousYtdAhop,
@@ -190,10 +267,12 @@ export async function runPayrollAction(periodId: string): Promise<{ success: boo
         periodStart: period.periodStart,
         periodEnd: period.periodEnd,
         workingDays: entry.workingDays,
+        workedHours: Number(entry.workedHours),
         baselineDays: period.baselineDays,
         regularPay: result.regularPay,
         ahopTopup: result.ahopTopup,
         grossWithAhop: result.grossWithAhop,
+        deMinimisPay: result.deMinimisPay,
         sssEmployee: result.sssEmployee,
         sssEmployer: result.sssEmployer,
         philHealthEmployee: result.philHealthEmployee,
@@ -206,13 +285,30 @@ export async function runPayrollAction(periodId: string): Promise<{ success: boo
         overtimeExtendedHours: Number(entry.overtimeExtendedHours),
         overtimeRegularPay: result.overtimeRegularPay,
         overtimeExtendedPay: result.overtimeExtendedPay,
+        otTotalHours: result.otTotalHours,
+        otTotalPay: result.otTotalPay,
         silDays: Number(entry.silDays),
         silPay: result.silPay,
         slHours: Number(entry.slHours),
         slPay: result.slPay,
+        totalLeaves: result.totalLeaves,
+        totalLeavesPay: result.totalLeavesPay,
         absenceHours: Number(entry.absenceHours),
         absencePay: result.absencePay,
+        absenceDeduction: result.absenceDeduction,
+        tardinessMinutes: result.tardinessMinutes,
         tardinessDeduction: result.tardinessDeduction,
+        aotMinutes: result.aotMinutes,
+        aotPay: result.aotPay,
+        extraOtPremium: result.extraOtPremium,
+        regularHolidayHours: result.regularHolidayHours,
+        regularHolidayPay: result.regularHolidayPay,
+        specialHolidayHours: result.specialHolidayHours,
+        specialHolidayPay: result.specialHolidayPay,
+        totalHolidayPay: result.totalHolidayPay,
+        coAhop: result.coAhop,
+        totalAhop: result.totalAhop,
+        withholdingTax: result.withholdingTax,
         loanDeductions: result.loanDeductions,
         salaryAdjustments: result.salaryAdjustments,
         ytdAhop: result.ytdAhop,

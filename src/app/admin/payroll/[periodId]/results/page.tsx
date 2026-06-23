@@ -59,14 +59,15 @@ export default async function PayrollResultsPage({
       philHealthER: acc.philHealthER + Number(snap.philHealthEmployer),
       pagIbigEE: acc.pagIbigEE + Number(snap.pagIbigEmployee),
       pagIbigER: acc.pagIbigER + Number(snap.pagIbigEmployer),
+      withholding: acc.withholding + Number(snap.withholdingTax),
       net: acc.net + Number(snap.netPay),
-      ahop: acc.ahop + Number(snap.ahopTopup),
+      ahop: acc.ahop + Number(snap.totalAhop || snap.ahopTopup),
     }),
     {
       gross: 0, sssEE: 0, sssER: 0,
       philHealthEE: 0, philHealthER: 0,
       pagIbigEE: 0, pagIbigER: 0,
-      net: 0, ahop: 0,
+      withholding: 0, net: 0, ahop: 0,
     }
   );
 
@@ -116,11 +117,16 @@ export default async function PayrollResultsPage({
               <th className="px-3 py-3 text-right font-semibold text-[#374151]">Basic Pay</th>
               <th className="px-3 py-3 text-right font-semibold text-[#374151]">AHOP</th>
               <th className="px-3 py-3 text-right font-semibold text-[#374151]">OT</th>
+              <th className="px-3 py-3 text-right font-semibold text-[#374151]">AOT</th>
+              <th className="px-3 py-3 text-right font-semibold text-[#374151]">Holiday</th>
+              <th className="px-3 py-3 text-right font-semibold text-[#374151]">OT %</th>
               <th className="px-3 py-3 text-right font-semibold text-[#374151]">Leaves</th>
+              <th className="px-3 py-3 text-right font-semibold text-[#374151]">De Minimis</th>
               <th className="px-3 py-3 text-right font-semibold text-[#374151]">Gross</th>
               <th className="px-3 py-3 text-right font-semibold text-[#374151]">SSS EE</th>
               <th className="px-3 py-3 text-right font-semibold text-[#374151]">PhilHealth EE</th>
               <th className="px-3 py-3 text-right font-semibold text-[#374151]">PagIbig EE</th>
+              <th className="px-3 py-3 text-right font-semibold text-[#374151]">W/H Tax</th>
               <th className="px-3 py-3 text-right font-semibold text-[#374151]">Other Ded.</th>
               <th className="px-3 py-3 text-right font-semibold text-[#2f4f3e]">Net Pay</th>
               <th className="px-3 py-3 text-right font-semibold text-[#374151]">YTD AHOP</th>
@@ -129,11 +135,10 @@ export default async function PayrollResultsPage({
           </thead>
           <tbody className="divide-y divide-[#f0ebe3]">
             {snapshots.map((snap) => {
-              const otPay = Number(snap.overtimeRegularPay) + Number(snap.overtimeExtendedPay);
-              const leavesPay = Number(snap.silPay) + Number(snap.slPay);
+              const otPay = Number(snap.otTotalPay || 0);
+              const leavesPay = Number(snap.totalLeavesPay || 0);
               const otherDed =
                 Number(snap.probationaryDeduction) +
-                Number(snap.tardinessDeduction) +
                 Number(snap.loanDeductions);
               return (
                 <tr key={snap.id} className="hover:bg-[#faf8f4]">
@@ -144,9 +149,13 @@ export default async function PayrollResultsPage({
                     ) : null}
                   </td>
                   <td className="px-3 py-2 text-right text-[#374151]">{toPeso(snap.regularPay)}</td>
-                  <td className="px-3 py-2 text-right text-[#374151]">{toPeso(snap.ahopTopup)}</td>
+                  <td className="px-3 py-2 text-right text-[#374151]">{toPeso(snap.coAhop)}</td>
                   <td className="px-3 py-2 text-right text-[#374151]">{toPeso(otPay)}</td>
+                  <td className="px-3 py-2 text-right text-[#374151]">{toPeso(snap.aotPay)}</td>
+                  <td className="px-3 py-2 text-right text-[#374151]">{toPeso(snap.totalHolidayPay)}</td>
+                  <td className="px-3 py-2 text-right text-[#374151]">{toPeso(snap.extraOtPremium)}</td>
                   <td className="px-3 py-2 text-right text-[#374151]">{toPeso(leavesPay)}</td>
+                  <td className="px-3 py-2 text-right text-[#374151]">{toPeso(snap.deMinimisPay)}</td>
                   <td className="px-3 py-2 text-right font-medium text-[#374151]">
                     {toPeso(snap.grossWithAhop)}
                   </td>
@@ -155,6 +164,7 @@ export default async function PayrollResultsPage({
                     {toPeso(snap.philHealthEmployee)}
                   </td>
                   <td className="px-3 py-2 text-right text-[#6b7280]">{toPeso(snap.pagIbigEmployee)}</td>
+                  <td className="px-3 py-2 text-right text-[#6b7280]">{toPeso(snap.withholdingTax)}</td>
                   <td className="px-3 py-2 text-right text-[#6b7280]">{toPeso(otherDed)}</td>
                   <td className="px-3 py-2 text-right font-semibold text-[#1a2e1f]">
                     {toPeso(snap.netPay)}
@@ -175,11 +185,12 @@ export default async function PayrollResultsPage({
           <tfoot className="border-t-2 border-[#ddd6ca] bg-[#f5f0e8]">
             <tr>
               <td className="px-3 py-3 font-semibold text-[#374151]">Totals</td>
-              <td colSpan={4} />
+              <td colSpan={7} />
               <td className="px-3 py-3 text-right font-semibold text-[#374151]">{toPeso(totals.gross)}</td>
               <td className="px-3 py-3 text-right font-semibold text-[#374151]">{toPeso(totals.sssEE)}</td>
               <td className="px-3 py-3 text-right font-semibold text-[#374151]">{toPeso(totals.philHealthEE)}</td>
               <td className="px-3 py-3 text-right font-semibold text-[#374151]">{toPeso(totals.pagIbigEE)}</td>
+              <td className="px-3 py-3 text-right font-semibold text-[#374151]">{toPeso(totals.withholding)}</td>
               <td />
               <td className="px-3 py-3 text-right font-semibold text-[#1a2e1f]">{toPeso(totals.net)}</td>
               <td colSpan={2} />

@@ -56,7 +56,13 @@ The app now chooses the T-style payslip when `deminimisAmount > 0`; otherwise it
 
 ## Phase 2 Recommended
 
-- Add payroll schema fields for taxable status, expected work hours/pay, scheduled work days/pay, worked hours, AOT minutes/pay, holiday hours/pay, OT premium, CO AHOP, total AHOP, withholding tax, and source gross/net.
-- Update the payroll formula engine to match the sheet's half-month model and AHOP breakdown.
-- Generate `.xlsx` exports with formulas/styles if finance needs a true spreadsheet clone rather than CSV.
 - Add source-template fixture tests so future imports catch column drift immediately.
+- Generate `.xlsx` exports with formulas/styles if finance needs a true spreadsheet clone rather than CSV.
+
+## Phase 2 Implemented
+
+- Added schema fields for taxable status, expected work hours/pay, scheduled work days/pay, worked hours, absence/tardiness source values, AOT minutes/pay, holiday hours/pay, OT premium, CO AHOP, total AHOP, withholding tax, source gross, and de minimis pay.
+- Added Prisma migration `20260623000200_payroll_template_phase2`.
+- Updated import persistence so template fields are saved into draft attendance rows.
+- Updated the payroll formula engine to use the source sheet's half-month template model when meaningful template fields are present, while preserving the old calculator behavior for ordinary/manual rows.
+- Updated payroll snapshots, CSV export, results table, and payslips to use the stored template-compatible values.
