@@ -19,20 +19,6 @@ function toPeso(value: number): string {
   }).format(value);
 }
 
-function toDateLabel(value: string): string {
-  const parsed = new Date(value);
-
-  if (Number.isNaN(parsed.getTime())) {
-    return value;
-  }
-
-  return new Intl.DateTimeFormat("en-PH", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  }).format(parsed);
-}
-
 type IconKind = "profile" | "inputs" | "review" | "regular" | "ahop" | "deductions" | "net";
 
 interface TutorialStep {
@@ -207,13 +193,6 @@ export default function Home() {
     result.ahopTopup > 0
       ? `AHOP added ${toPeso(result.ahopTopup)} because this period has ${ahopDays} fewer day(s) than your baseline.`
       : "No AHOP top-up was needed this period because regular pay already met the baseline.";
-
-  const employeeName = fullName.trim() || "(not set)";
-  const generatedOn = new Intl.DateTimeFormat("en-PH", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  }).format(new Date());
 
   const sampleFormulaResult = calculatePayroll({
     salaryType: "DAILY",
@@ -461,15 +440,6 @@ export default function Home() {
               Notes: Pay schedule follows handbook windows: 26th-10th paid on 15th, 11th-25th paid on last day of month.
               Payment method is cash or direct bank only.
             </p>
-            <div className="mt-4 flex justify-end">
-              <button
-                type="button"
-                onClick={() => window.print()}
-                className="print-exclude rounded-lg border border-[#2f4f3e] bg-[#2f4f3e] px-4 py-2 text-sm font-semibold text-white hover:bg-[#274636]"
-              >
-                Preview Payslip
-              </button>
-            </div>
           </CardContent>
         </Card>
 
@@ -596,61 +566,6 @@ export default function Home() {
                   ))}
                 </TableBody>
               </Table>
-            </div>
-          </CardContent>
-        </Card>
-      </section>
-
-      <section className="payslip-print-area">
-        <Card className="payslip-sheet surface">
-          <CardHeader className="border-b border-[#d7d0c4] pb-4">
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div>
-                <CardTitle className="text-2xl tracking-tight">AHOP Payroll Payslip</CardTitle>
-                <CardDescription className="mt-1 text-xs uppercase tracking-[0.14em]">
-                  Generated {generatedOn}
-                </CardDescription>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent className="pt-5">
-            <div className="grid gap-2 text-sm sm:grid-cols-2">
-              <p><span className="font-semibold">Employee:</span> {employeeName}</p>
-              <p><span className="font-semibold">Date Started:</span> {toDateLabel(dateStarted)}</p>
-              <p><span className="font-semibold">Salary Type:</span> {salaryType}</p>
-              <p><span className="font-semibold">Working Days:</span> {workingDays}</p>
-            </div>
-
-            <div className="mt-5 grid gap-4 md:grid-cols-2">
-              <div className="rounded-lg border border-[#d8d2c6] bg-white">
-                <div className="border-b border-[#e4ddd1] bg-[#f7f2e8] px-3 py-2 text-sm font-semibold uppercase tracking-[0.08em]">Earnings</div>
-                <div className="space-y-2 px-3 py-3 text-sm">
-                  <div className="flex items-center justify-between"><span>Regular Pay</span><strong>{toPeso(result.regularPay)}</strong></div>
-                  <div className="flex items-center justify-between"><span>AHOP Top-up</span><strong>{toPeso(result.ahopTopup)}</strong></div>
-                  <Separator />
-                  <div className="flex items-center justify-between text-base font-semibold"><span>Gross Pay</span><span>{toPeso(result.grossWithAhop)}</span></div>
-                </div>
-              </div>
-
-              <div className="rounded-lg border border-[#d8d2c6] bg-white">
-                <div className="border-b border-[#e4ddd1] bg-[#edf3ee] px-3 py-2 text-sm font-semibold uppercase tracking-[0.08em]">Deductions</div>
-                <div className="space-y-2 px-3 py-3 text-sm">
-                  <div className="flex items-center justify-between"><span>SSS (EE)</span><span>{toPeso(result.sssEmployee)}</span></div>
-                  <div className="flex items-center justify-between"><span>PhilHealth (EE)</span><span>{toPeso(result.philHealthEmployee)}</span></div>
-                  <div className="flex items-center justify-between"><span>Pag-IBIG (EE)</span><span>{toPeso(result.pagIbigEmployee)}</span></div>
-                  <div className="flex items-center justify-between"><span>Probationary Deduction</span><span>{toPeso(result.probationaryDeduction)}</span></div>
-                  <Separator />
-                  <div className="flex items-center justify-between text-base font-semibold"><span>Total Deductions</span><span>{toPeso(totalEmployeeDeductions)}</span></div>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-5 rounded-lg border border-[#d8d2c6] bg-[#f8f5ef] px-4 py-3">
-              <div className="flex flex-wrap items-center justify-between gap-3 text-lg font-semibold">
-                <span>NET PAY</span>
-                <span>{toPeso(result.netPay)}</span>
-              </div>
-              <p className="caption mt-1 text-xs">Reference: handbook payout windows (26th-10th and 11th-25th).</p>
             </div>
           </CardContent>
         </Card>
