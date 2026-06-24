@@ -29,6 +29,7 @@ export default async function AttendancePeriodPage({
               id: true,
               fullName: true,
               position: true,
+              dateStarted: true,
               salaryType: true,
               salaryCategory: true,
               dailyRate: true,
@@ -36,6 +37,7 @@ export default async function AttendancePeriodPage({
               probationaryDeductionPct: true,
               taxable: true,
               paymentMethod: true,
+              employmentStage: true,
               deminimisAmount: true,
             },
           },
@@ -65,6 +67,9 @@ export default async function AttendancePeriodPage({
     employeeId: entry.employee.id,
     employeeName: entry.employee.fullName,
     position: entry.employee.position ?? "",
+    dateStarted: entry.employee.dateStarted.toISOString(),
+    paymentMethod: entry.employee.paymentMethod,
+    employmentStage: entry.employee.employmentStage,
     salaryType: entry.employee.salaryType as "DAILY" | "MONTHLY",
     salaryCategory: entry.employee.salaryCategory,
     dailyRate: Number(entry.employee.dailyRate ?? 0),
@@ -124,7 +129,14 @@ export default async function AttendancePeriodPage({
         </span>
       </div>
 
-      <AttendanceGrid periodId={periodId} baselineDays={period.baselineDays} entries={entries} />
+      <AttendanceGrid
+        periodId={periodId}
+        periodLabel={period.label}
+        periodStart={period.periodStart.toISOString()}
+        periodEnd={period.periodEnd.toISOString()}
+        baselineDays={period.baselineDays}
+        entries={entries}
+      />
     </div>
   );
 }
