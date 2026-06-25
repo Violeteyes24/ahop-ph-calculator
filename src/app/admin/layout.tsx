@@ -8,14 +8,14 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   await requireAdmin();
 
   return (
-    <div className="flex min-h-screen bg-[#f5f0e8]">
-      <aside className="fixed inset-y-0 left-0 z-40 flex w-56 flex-col border-r border-[#ddd6ca] bg-white">
-        <div className="flex h-14 items-center border-b border-[#ddd6ca] px-4">
+    <div className="flex min-h-screen bg-background">
+      <aside className="fixed inset-y-0 left-0 z-40 flex w-56 flex-col border-r border-border bg-card">
+        <div className="flex h-14 items-center border-b border-border px-4">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#5c665f]">
+            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
               Apnea Dynamics
             </p>
-            <p className="text-xs text-[#9ca3af]">Payroll System</p>
+            <p className="text-xs text-muted-foreground">Payroll System</p>
           </div>
         </div>
 
@@ -41,7 +41,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             Reports
           </NavLink>
 
-          <div className="mt-auto border-t border-[#ddd6ca] pt-3">
+          <div className="mt-auto border-t border-border pt-3">
             <NavLink href="/admin/settings">
               <SettingsIcon />
               Settings
@@ -49,7 +49,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             <form action={logoutAction}>
               <button
                 type="submit"
-                className="mt-1 flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[#6b7280] hover:bg-[#f5f0e8] hover:text-[#1a2e1f]"
+                className="mt-1 flex w-full items-center gap-2 rounded-lg px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground"
               >
                 <LogoutIcon />
                 Sign out
@@ -68,7 +68,7 @@ function NavLink({ href, children }: { href: string; children: React.ReactNode }
   return (
     <Link
       href={href}
-      className="flex items-center gap-2 rounded-lg px-3 py-2 text-[#374151] hover:bg-[#f5f0e8] hover:text-[#1a2e1f]"
+      className="flex items-center gap-2 rounded-lg px-3 py-2 text-foreground hover:bg-muted hover:text-foreground"
     >
       {children}
     </Link>

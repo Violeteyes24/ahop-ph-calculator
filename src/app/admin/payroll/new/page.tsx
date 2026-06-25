@@ -24,22 +24,22 @@ export default function NewPayrollPeriodPage() {
   return (
     <div className="max-w-lg">
       <div className="mb-6">
-        <Link href="/admin/payroll" className="text-sm text-[#6b7280] hover:text-[#1a2e1f]">
+        <Link href="/admin/payroll" className="text-sm text-muted-foreground hover:text-foreground">
           ← Back to payroll
         </Link>
-        <h1 className="mt-2 text-2xl font-semibold tracking-tight text-[#1a2e1f]">
+        <h1 className="mt-2 text-2xl font-semibold tracking-tight text-foreground">
           New payroll period
         </h1>
-        <p className="mt-1 text-sm text-[#6b7280]">
+        <p className="mt-1 text-sm text-muted-foreground">
           This will create attendance entry slots for all active employees.
         </p>
       </div>
 
-      <form action={formAction} className="rounded-xl border border-[#ddd6ca] bg-white p-6">
+      <form action={formAction} className="rounded-xl border border-border bg-card p-6">
         <div className="grid gap-4">
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="periodStart" className="text-sm font-medium text-[#374151]">
+              <label htmlFor="periodStart" className="text-sm font-medium text-foreground">
                 Period start
               </label>
               <input
@@ -47,11 +47,11 @@ export default function NewPayrollPeriodPage() {
                 name="periodStart"
                 type="date"
                 required
-                className="rounded-lg border border-[#d1d5db] px-3 py-2 text-sm outline-none focus:border-[#2f4f3e] focus:ring-1 focus:ring-[#2f4f3e]"
+                className="rounded-lg border border-input px-3 py-2 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
               />
             </div>
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="periodEnd" className="text-sm font-medium text-[#374151]">
+              <label htmlFor="periodEnd" className="text-sm font-medium text-foreground">
                 Period end
               </label>
               <input
@@ -59,27 +59,27 @@ export default function NewPayrollPeriodPage() {
                 name="periodEnd"
                 type="date"
                 required
-                className="rounded-lg border border-[#d1d5db] px-3 py-2 text-sm outline-none focus:border-[#2f4f3e] focus:ring-1 focus:ring-[#2f4f3e]"
+                className="rounded-lg border border-input px-3 py-2 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
               />
             </div>
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="label" className="text-sm font-medium text-[#374151]">
+            <label htmlFor="label" className="text-sm font-medium text-foreground">
               Period label
             </label>
             <input
               id="label"
               name="label"
               required
-              className="rounded-lg border border-[#d1d5db] px-3 py-2 text-sm outline-none focus:border-[#2f4f3e] focus:ring-1 focus:ring-[#2f4f3e]"
+              className="rounded-lg border border-input px-3 py-2 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
               placeholder="e.g. Nov 11–25 2025"
             />
-            <p className="text-xs text-[#9ca3af]">A short name for this pay period.</p>
+            <p className="text-xs text-muted-foreground">A short name for this pay period.</p>
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="baselineDays" className="text-sm font-medium text-[#374151]">
+            <label htmlFor="baselineDays" className="text-sm font-medium text-foreground">
               Baseline days
             </label>
             <input
@@ -90,9 +90,9 @@ export default function NewPayrollPeriodPage() {
               max="31"
               defaultValue="23"
               required
-              className="rounded-lg border border-[#d1d5db] px-3 py-2 text-sm outline-none focus:border-[#2f4f3e] focus:ring-1 focus:ring-[#2f4f3e]"
+              className="rounded-lg border border-input px-3 py-2 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
             />
-            <p className="text-xs text-[#9ca3af]">
+            <p className="text-xs text-muted-foreground">
               The standard number of working days for AHOP calculation (typically 23).
             </p>
           </div>
@@ -106,13 +106,13 @@ export default function NewPayrollPeriodPage() {
           <button
             type="submit"
             disabled={isPending}
-            className="rounded-lg bg-[#2f4f3e] px-5 py-2 text-sm font-semibold text-white hover:bg-[#274636] disabled:opacity-60"
+            className="rounded-lg bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
           >
             {isPending ? "Creating…" : "Create period"}
           </button>
           <Link
             href="/admin/payroll"
-            className="rounded-lg border border-[#d1d5db] px-5 py-2 text-sm font-medium text-[#374151] hover:bg-[#f5f0e8]"
+            className="rounded-lg border border-input px-5 py-2 text-sm font-medium text-foreground hover:bg-muted"
           >
             Cancel
           </Link>

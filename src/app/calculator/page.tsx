@@ -299,15 +299,12 @@ export default function Home() {
 
   return (
     <main className="relative mx-auto flex w-full max-w-6xl flex-col gap-6 overflow-hidden px-4 py-6 sm:px-6 lg:px-8 print-main">
-      <div aria-hidden className="print-exclude pointer-events-none absolute -left-16 -top-24 h-56 w-56 rounded-full bg-[#f4eee4] blur-2xl" />
-      <div aria-hidden className="print-exclude pointer-events-none absolute -right-10 top-24 h-48 w-48 rounded-full bg-[#e7efe8] blur-2xl" />
-
       <section className="print-exclude surface enter-up rounded-2xl p-5 sm:p-8">
         <Badge variant="secondary" className="font-mono text-xs uppercase tracking-[0.12em]">
           AHOP PH v1
         </Badge>
         <h1 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">Payroll Snapshot: Regular vs With AHOP</h1>
-        <p className="caption mt-3 max-w-3xl text-sm leading-7 sm:text-base text-black">
+        <p className="caption mt-3 max-w-3xl text-sm leading-7 sm:text-base">
           This calculator follows your handbook policy for daily wage with Accumulated Holiday and Overtime Pay (AHOP),
           bi-monthly payout timing, and mandatory SSS, PhilHealth, and Pag-IBIG deductions.
         </p>
@@ -324,20 +321,20 @@ export default function Home() {
           <button
             type="button"
             onClick={applyHandbookSample}
-            className="rounded-xl border border-[#c9c2b7] bg-white px-4 py-2 text-sm font-medium hover:bg-[#f7f4ef]"
+            className="rounded-xl border border-border bg-card px-4 py-2 text-sm font-medium hover:bg-muted"
           >
             Try handbook sample
           </button>
           <button
             type="button"
             onClick={openFormulaTutorial}
-            className="rounded-xl border border-[#2f4f3e] bg-[#edf3ee] px-4 py-2 text-sm font-semibold text-[#254235] hover:bg-[#e3ede5]"
+            className="rounded-xl border border-primary bg-accent px-4 py-2 text-sm font-semibold text-foreground hover:bg-accent/80"
           >
             Formula Walkthrough
           </button>
           <Link
             href="/login"
-            className="rounded-xl border border-[#c9c2b7] bg-white px-4 py-2 text-sm font-semibold text-[#254235] hover:bg-[#f7f4ef]"
+            className="rounded-xl border border-border bg-card px-4 py-2 text-sm font-semibold text-foreground hover:bg-muted"
           >
             Finance sign in
           </Link>
@@ -450,21 +447,21 @@ export default function Home() {
           </CardHeader>
           <CardContent>
             <div className="grid gap-3 text-sm">
-              <div className="flex items-center justify-between rounded-md bg-[#f4eee4] px-3 py-2">
+              <div className="flex items-center justify-between rounded-md bg-accent px-3 py-2">
                 <span>Regular Pay</span>
                 <strong>{toPeso(result.regularPay)}</strong>
               </div>
-              <div className="flex items-center justify-between rounded-md bg-[#f2e2d5] px-3 py-2">
+              <div className="flex items-center justify-between rounded-md bg-primary/10 px-3 py-2">
                 <span>AHOP Top-up</span>
                 <strong>{toPeso(result.ahopTopup)}</strong>
               </div>
-              <div className="flex items-center justify-between rounded-md bg-[#ebf3ed] px-3 py-2 text-base">
+              <div className="flex items-center justify-between rounded-md bg-accent px-3 py-2 text-base">
                 <span>Gross With AHOP</span>
                 <strong>{toPeso(result.grossWithAhop)}</strong>
               </div>
             </div>
 
-            <h3 className="mt-5 text-sm font-semibold uppercase tracking-[0.16em] text-[#5c665f]">Employee Deductions</h3>
+            <h3 className="mt-5 text-sm font-semibold uppercase tracking-[0.16em] text-muted-foreground">Employee Deductions</h3>
             <div className="mt-3 grid gap-2 text-sm">
               <div className="flex items-center justify-between"><span>SSS (EE)</span><span>{toPeso(result.sssEmployee)}</span></div>
               <div className="flex items-center justify-between"><span>PhilHealth (EE)</span><span>{toPeso(result.philHealthEmployee)}</span></div>
@@ -477,7 +474,7 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="mt-4 rounded-xl bg-[#f6f1e8] p-3 text-sm leading-6">
+            <div className="mt-4 rounded-xl bg-muted p-3 text-sm leading-6">
               <p className="font-medium">Plain-language summary</p>
               <p className="mt-1">{teachingSummary}</p>
               <p className="mt-2">
@@ -488,13 +485,13 @@ export default function Home() {
             <button
               type="button"
               onClick={() => setIsTutorialOpen(true)}
-              className="mt-4 inline-flex items-center gap-2 rounded-lg border border-[#d4cebf] bg-white px-3 py-1.5 text-xs font-medium hover:bg-[#f7f4ef]"
+              className="mt-4 inline-flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-1.5 text-xs font-medium hover:bg-muted"
             >
               <TutorialIcon kind="inputs" />
               Open quick tutorial and terms
             </button>
 
-            <h3 className="mt-5 text-sm font-semibold uppercase tracking-[0.16em] text-[#5c665f]">Employer Share</h3>
+            <h3 className="mt-5 text-sm font-semibold uppercase tracking-[0.16em] text-muted-foreground">Employer Share</h3>
             <div className="mt-3 grid gap-2 text-sm">
               <div className="flex items-center justify-between"><span>SSS (ER)</span><span>{toPeso(result.sssEmployer)}</span></div>
               <div className="flex items-center justify-between"><span>PhilHealth (ER)</span><span>{toPeso(result.philHealthEmployer)}</span></div>
@@ -514,11 +511,11 @@ export default function Home() {
           </CardHeader>
           <CardContent>
             <div className="mt-0 grid gap-3 text-sm">
-              <div className="flex items-center justify-between rounded-md bg-[#f4eee4] px-3 py-2">
+              <div className="flex items-center justify-between rounded-md bg-accent px-3 py-2">
                 <span>Projected Annual Regular</span>
                 <strong>{toPeso(result.annualRegularProjection)}</strong>
               </div>
-              <div className="flex items-center justify-between rounded-md bg-[#f2e2d5] px-3 py-2">
+              <div className="flex items-center justify-between rounded-md bg-primary/10 px-3 py-2">
                 <span>Projected Annual With AHOP</span>
                 <strong>{toPeso(result.annualWithAhopProjection)}</strong>
               </div>
@@ -547,7 +544,7 @@ export default function Home() {
             </div>
             <div className="mt-4 overflow-x-auto rounded-md border">
               <Table>
-                <TableHeader className="bg-[#f4eee4]">
+                <TableHeader className="bg-accent">
                   <TableRow>
                     <TableHead>Gross + AHOP</TableHead>
                     <TableHead>SSS ER/EE</TableHead>
@@ -590,7 +587,7 @@ export default function Home() {
                 type="button"
                 aria-label="Close tutorial"
                 onClick={() => setIsTutorialOpen(false)}
-                className="rounded-md border border-[#d7d0c4] px-2 py-1 text-sm hover:bg-[#f6f2ea]"
+                className="rounded-md border border-border px-2 py-1 text-sm hover:bg-muted"
               >
                 X
               </button>
@@ -611,7 +608,7 @@ export default function Home() {
             </div>
 
             <div className="mt-6">
-              <h3 className="text-sm font-semibold uppercase tracking-[0.12em] text-[#5c665f]">Definition of terms</h3>
+              <h3 className="text-sm font-semibold uppercase tracking-[0.12em] text-muted-foreground">Definition of terms</h3>
               <div className="mt-3 grid gap-2 sm:grid-cols-2">
                 {glossary.map((item) => (
                   <article key={item.term} className="term-item">
@@ -638,7 +635,7 @@ export default function Home() {
               <button
                 type="button"
                 onClick={() => setIsTutorialOpen(false)}
-                className="rounded-xl border border-[#c9c2b7] bg-white px-4 py-2 text-sm font-medium hover:bg-[#f7f4ef]"
+                className="rounded-xl border border-border bg-card px-4 py-2 text-sm font-medium hover:bg-muted"
               >
                 Close tutorial
               </button>
@@ -666,13 +663,13 @@ export default function Home() {
                 type="button"
                 aria-label="Close formula tutorial"
                 onClick={() => setIsFormulaTutorialOpen(false)}
-                className="rounded-md border border-[#d7d0c4] px-2 py-1 text-sm hover:bg-[#f6f2ea]"
+                className="rounded-md border border-border px-2 py-1 text-sm hover:bg-muted"
               >
                 X
               </button>
             </header>
 
-            <div className="mt-4 rounded-lg border border-[#ddd5c8] bg-[#fbf8f2] px-3 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-[#4e5d52]">
+            <div className="mt-4 rounded-lg border border-border bg-muted px-3 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-foreground">
               Step {formulaStepIndex + 1} of {formulaSlides.length}
             </div>
 
@@ -697,7 +694,7 @@ export default function Home() {
                   type="button"
                   onClick={() => setFormulaStepIndex((previous) => Math.max(previous - 1, 0))}
                   disabled={formulaStepIndex === 0}
-                  className="rounded-xl border border-[#c9c2b7] bg-white px-3 py-2 text-sm font-medium hover:bg-[#f7f4ef] disabled:cursor-not-allowed disabled:opacity-50"
+                  className="rounded-xl border border-border bg-card px-3 py-2 text-sm font-medium hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   ← Previous
                 </button>
@@ -705,7 +702,7 @@ export default function Home() {
                   type="button"
                   onClick={() => setFormulaStepIndex((previous) => Math.min(previous + 1, formulaSlides.length - 1))}
                   disabled={formulaStepIndex === formulaSlides.length - 1}
-                  className="rounded-xl border border-[#c9c2b7] bg-white px-3 py-2 text-sm font-medium hover:bg-[#f7f4ef] disabled:cursor-not-allowed disabled:opacity-50"
+                  className="rounded-xl border border-border bg-card px-3 py-2 text-sm font-medium hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Next →
                 </button>
@@ -722,7 +719,7 @@ export default function Home() {
                 <button
                   type="button"
                   onClick={() => setIsFormulaTutorialOpen(false)}
-                  className="rounded-xl border border-[#c9c2b7] bg-white px-3 py-2 text-sm font-medium hover:bg-[#f7f4ef]"
+                  className="rounded-xl border border-border bg-card px-3 py-2 text-sm font-medium hover:bg-muted"
                 >
                   Close
                 </button>

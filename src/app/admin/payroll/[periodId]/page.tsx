@@ -51,10 +51,10 @@ export default async function AttendancePeriodPage({
   if (period.status === "COMPLETED") {
     return (
       <div className="flex flex-col items-center gap-4 py-16 text-center">
-        <p className="text-[#6b7280]">This period has already been processed.</p>
+        <p className="text-muted-foreground">This period has already been processed.</p>
         <Link
           href={`/admin/payroll/${periodId}/results`}
-          className="rounded-lg bg-[#2f4f3e] px-5 py-2 text-sm font-semibold text-white hover:bg-[#274636]"
+          className="rounded-lg bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
         >
           View results
         </Link>
@@ -113,13 +113,13 @@ export default async function AttendancePeriodPage({
     <div>
       <div className="mb-6 flex items-start justify-between">
         <div>
-          <Link href="/admin/payroll" className="text-sm text-[#6b7280] hover:text-[#1a2e1f]">
+          <Link href="/admin/payroll" className="text-sm text-muted-foreground hover:text-foreground">
             ← Back to payroll
           </Link>
-          <h1 className="mt-2 text-2xl font-semibold tracking-tight text-[#1a2e1f]">
+          <h1 className="mt-2 text-2xl font-semibold tracking-tight text-foreground">
             {period.label}
           </h1>
-          <p className="mt-1 text-sm text-[#6b7280]">
+          <p className="mt-1 text-sm text-muted-foreground">
             {toDateLabel(period.periodStart)} – {toDateLabel(period.periodEnd)} ·{" "}
             {period.baselineDays} baseline days · {entries.length} employees
           </p>

@@ -39,7 +39,7 @@ export default async function EmployeePayslipPage({
   return (
     <div>
       <div className="mb-4 flex items-center justify-between print:hidden">
-        <Link href="/payslip" className="text-sm text-[#6b7280] hover:text-[#1a2e1f]">
+        <Link href="/payslip" className="text-sm text-muted-foreground hover:text-foreground">
           My payslips
         </Link>
         <PrintButton />

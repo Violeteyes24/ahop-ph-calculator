@@ -12,20 +12,20 @@ export default function NewEmployeePage() {
   return (
     <div className="max-w-2xl">
       <div className="mb-6">
-        <Link href="/admin/employees" className="text-sm text-[#6b7280] hover:text-[#1a2e1f]">
+        <Link href="/admin/employees" className="text-sm text-muted-foreground hover:text-foreground">
           ← Back to employees
         </Link>
-        <h1 className="mt-2 text-2xl font-semibold tracking-tight text-[#1a2e1f]">Add employee</h1>
+        <h1 className="mt-2 text-2xl font-semibold tracking-tight text-foreground">Add employee</h1>
       </div>
 
-      <form action={formAction} className="rounded-xl border border-[#ddd6ca] bg-white p-6">
+      <form action={formAction} className="rounded-xl border border-border bg-card p-6">
         <EmployeeFormFields />
 
-        <div className="mt-6 border-t border-[#f0ebe3] pt-6">
-          <h3 className="mb-4 text-sm font-semibold text-[#374151]">Account credentials</h3>
+        <div className="mt-6 border-t border-border pt-6">
+          <h3 className="mb-4 text-sm font-semibold text-foreground">Account credentials</h3>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="sm:col-span-2 flex flex-col gap-1.5">
-              <label htmlFor="email" className="text-sm font-medium text-[#374151]">
+              <label htmlFor="email" className="text-sm font-medium text-foreground">
                 Email address
               </label>
               <input
@@ -33,12 +33,12 @@ export default function NewEmployeePage() {
                 name="email"
                 type="email"
                 required
-                className="rounded-lg border border-[#d1d5db] px-3 py-2 text-sm outline-none focus:border-[#2f4f3e] focus:ring-1 focus:ring-[#2f4f3e]"
+                className="rounded-lg border border-input px-3 py-2 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                 placeholder="employee@apneadynamics.org"
               />
             </div>
             <div className="sm:col-span-2 flex flex-col gap-1.5">
-              <label htmlFor="password" className="text-sm font-medium text-[#374151]">
+              <label htmlFor="password" className="text-sm font-medium text-foreground">
                 Initial password
               </label>
               <input
@@ -47,10 +47,10 @@ export default function NewEmployeePage() {
                 type="text"
                 required
                 minLength={8}
-                className="rounded-lg border border-[#d1d5db] px-3 py-2 text-sm outline-none focus:border-[#2f4f3e] focus:ring-1 focus:ring-[#2f4f3e]"
+                className="rounded-lg border border-input px-3 py-2 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                 placeholder="Min. 8 characters"
               />
-              <p className="text-xs text-[#9ca3af]">Share this with the employee so they can sign in.</p>
+              <p className="text-xs text-muted-foreground">Share this with the employee so they can sign in.</p>
             </div>
           </div>
         </div>
@@ -63,13 +63,13 @@ export default function NewEmployeePage() {
           <button
             type="submit"
             disabled={isPending}
-            className="rounded-lg bg-[#2f4f3e] px-5 py-2 text-sm font-semibold text-white hover:bg-[#274636] disabled:opacity-60"
+            className="rounded-lg bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
           >
             {isPending ? "Creating…" : "Create employee"}
           </button>
           <Link
             href="/admin/employees"
-            className="rounded-lg border border-[#d1d5db] px-5 py-2 text-sm font-medium text-[#374151] hover:bg-[#f5f0e8]"
+            className="rounded-lg border border-input px-5 py-2 text-sm font-medium text-foreground hover:bg-muted"
           >
             Cancel
           </Link>
@@ -99,47 +99,47 @@ export function EmployeeFormFields({
   return (
     <div className="grid gap-4 sm:grid-cols-2">
       <div className="sm:col-span-2 flex flex-col gap-1.5">
-        <label htmlFor="fullName" className="text-sm font-medium text-[#374151]">Full name</label>
+        <label htmlFor="fullName" className="text-sm font-medium text-foreground">Full name</label>
         <input
           id="fullName"
           name="fullName"
           required
           defaultValue={defaults?.fullName}
-          className="rounded-lg border border-[#d1d5db] px-3 py-2 text-sm outline-none focus:border-[#2f4f3e] focus:ring-1 focus:ring-[#2f4f3e]"
+          className="rounded-lg border border-input px-3 py-2 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
           placeholder="Juan Dela Cruz"
         />
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="position" className="text-sm font-medium text-[#374151]">Position</label>
+        <label htmlFor="position" className="text-sm font-medium text-foreground">Position</label>
         <input
           id="position"
           name="position"
           defaultValue={defaults?.position}
-          className="rounded-lg border border-[#d1d5db] px-3 py-2 text-sm outline-none focus:border-[#2f4f3e] focus:ring-1 focus:ring-[#2f4f3e]"
+          className="rounded-lg border border-input px-3 py-2 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
           placeholder="Dive Instructor"
         />
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="dateStarted" className="text-sm font-medium text-[#374151]">Date started</label>
+        <label htmlFor="dateStarted" className="text-sm font-medium text-foreground">Date started</label>
         <input
           id="dateStarted"
           name="dateStarted"
           type="date"
           required
           defaultValue={defaults?.dateStarted}
-          className="rounded-lg border border-[#d1d5db] px-3 py-2 text-sm outline-none focus:border-[#2f4f3e] focus:ring-1 focus:ring-[#2f4f3e]"
+          className="rounded-lg border border-input px-3 py-2 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
         />
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="salaryType" className="text-sm font-medium text-[#374151]">Salary type</label>
+        <label htmlFor="salaryType" className="text-sm font-medium text-foreground">Salary type</label>
         <select
           id="salaryType"
           name="salaryType"
           defaultValue={defaults?.salaryType ?? "DAILY"}
-          className="rounded-lg border border-[#d1d5db] px-3 py-2 text-sm outline-none focus:border-[#2f4f3e] focus:ring-1 focus:ring-[#2f4f3e]"
+          className="rounded-lg border border-input px-3 py-2 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
         >
           <option value="DAILY">Daily</option>
           <option value="MONTHLY">Monthly</option>
@@ -147,12 +147,12 @@ export function EmployeeFormFields({
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="salaryCategory" className="text-sm font-medium text-[#374151]">Salary category</label>
+        <label htmlFor="salaryCategory" className="text-sm font-medium text-foreground">Salary category</label>
         <select
           id="salaryCategory"
           name="salaryCategory"
           defaultValue={defaults?.salaryCategory ?? "AHOP"}
-          className="rounded-lg border border-[#d1d5db] px-3 py-2 text-sm outline-none focus:border-[#2f4f3e] focus:ring-1 focus:ring-[#2f4f3e]"
+          className="rounded-lg border border-input px-3 py-2 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
         >
           <option value="AHOP">AHOP</option>
           <option value="NON_AHOP">Non-AHOP</option>
@@ -160,7 +160,7 @@ export function EmployeeFormFields({
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="dailyRate" className="text-sm font-medium text-[#374151]">Daily rate (₱)</label>
+        <label htmlFor="dailyRate" className="text-sm font-medium text-foreground">Daily rate (₱)</label>
         <input
           id="dailyRate"
           name="dailyRate"
@@ -168,13 +168,13 @@ export function EmployeeFormFields({
           step="0.01"
           min="0"
           defaultValue={defaults?.dailyRate}
-          className="rounded-lg border border-[#d1d5db] px-3 py-2 text-sm outline-none focus:border-[#2f4f3e] focus:ring-1 focus:ring-[#2f4f3e]"
+          className="rounded-lg border border-input px-3 py-2 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
           placeholder="500.00"
         />
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="monthlyRate" className="text-sm font-medium text-[#374151]">Monthly rate (₱)</label>
+        <label htmlFor="monthlyRate" className="text-sm font-medium text-foreground">Monthly rate (₱)</label>
         <input
           id="monthlyRate"
           name="monthlyRate"
@@ -182,18 +182,18 @@ export function EmployeeFormFields({
           step="0.01"
           min="0"
           defaultValue={defaults?.monthlyRate}
-          className="rounded-lg border border-[#d1d5db] px-3 py-2 text-sm outline-none focus:border-[#2f4f3e] focus:ring-1 focus:ring-[#2f4f3e]"
+          className="rounded-lg border border-input px-3 py-2 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
           placeholder="11000.00"
         />
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="employmentStage" className="text-sm font-medium text-[#374151]">Employment stage</label>
+        <label htmlFor="employmentStage" className="text-sm font-medium text-foreground">Employment stage</label>
         <select
           id="employmentStage"
           name="employmentStage"
           defaultValue={defaults?.employmentStage ?? "PROBATIONARY"}
-          className="rounded-lg border border-[#d1d5db] px-3 py-2 text-sm outline-none focus:border-[#2f4f3e] focus:ring-1 focus:ring-[#2f4f3e]"
+          className="rounded-lg border border-input px-3 py-2 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
         >
           <option value="PROBATIONARY">Probationary</option>
           <option value="REGULAR">Regular</option>
@@ -201,7 +201,7 @@ export function EmployeeFormFields({
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="probationaryDeductionPct" className="text-sm font-medium text-[#374151]">
+        <label htmlFor="probationaryDeductionPct" className="text-sm font-medium text-foreground">
           Probationary deduction (%)
         </label>
         <input
@@ -212,17 +212,17 @@ export function EmployeeFormFields({
           min="0"
           max="100"
           defaultValue={defaults?.probationaryDeductionPct ?? "0"}
-          className="rounded-lg border border-[#d1d5db] px-3 py-2 text-sm outline-none focus:border-[#2f4f3e] focus:ring-1 focus:ring-[#2f4f3e]"
+          className="rounded-lg border border-input px-3 py-2 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
         />
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="paymentMethod" className="text-sm font-medium text-[#374151]">Payment method</label>
+        <label htmlFor="paymentMethod" className="text-sm font-medium text-foreground">Payment method</label>
         <select
           id="paymentMethod"
           name="paymentMethod"
           defaultValue={defaults?.paymentMethod ?? "BANK"}
-          className="rounded-lg border border-[#d1d5db] px-3 py-2 text-sm outline-none focus:border-[#2f4f3e] focus:ring-1 focus:ring-[#2f4f3e]"
+          className="rounded-lg border border-input px-3 py-2 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
         >
           <option value="BANK">Bank</option>
           <option value="CASH">Cash</option>
@@ -230,7 +230,7 @@ export function EmployeeFormFields({
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="deminimisAmount" className="text-sm font-medium text-[#374151]">De Minimis (₱/month)</label>
+        <label htmlFor="deminimisAmount" className="text-sm font-medium text-foreground">De Minimis (₱/month)</label>
         <input
           id="deminimisAmount"
           name="deminimisAmount"
@@ -238,7 +238,7 @@ export function EmployeeFormFields({
           step="0.01"
           min="0"
           defaultValue={defaults?.deminimisAmount ?? "0"}
-          className="rounded-lg border border-[#d1d5db] px-3 py-2 text-sm outline-none focus:border-[#2f4f3e] focus:ring-1 focus:ring-[#2f4f3e]"
+          className="rounded-lg border border-input px-3 py-2 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
         />
       </div>
     </div>

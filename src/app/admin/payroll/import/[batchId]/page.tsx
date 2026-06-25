@@ -61,13 +61,13 @@ export default async function PayrollImportPreviewPage({
     <div>
       <div className="mb-6 flex items-start justify-between">
         <div>
-          <Link href="/admin/payroll/import" className="text-sm text-[#6b7280] hover:text-[#1a2e1f]">
+          <Link href="/admin/payroll/import" className="text-sm text-muted-foreground hover:text-foreground">
             Back to imports
           </Link>
-          <h1 className="mt-2 text-2xl font-semibold tracking-tight text-[#1a2e1f]">
+          <h1 className="mt-2 text-2xl font-semibold tracking-tight text-foreground">
             Preview import
           </h1>
-          <p className="mt-1 text-sm text-[#6b7280]">
+          <p className="mt-1 text-sm text-muted-foreground">
             {batch.fileName} · {data.employees.length} employees · {toDateLabel(data.periodStart)} to{" "}
             {toDateLabel(data.periodEnd)}
           </p>
@@ -78,7 +78,7 @@ export default async function PayrollImportPreviewPage({
       </div>
 
       {batch.period ? (
-        <div className="mb-6 rounded-xl border border-[#c3d9c9] bg-[#edf3ee] px-4 py-3 text-sm text-[#2f4f3e]">
+        <div className="mb-6 rounded-xl border border-primary/30 bg-accent px-4 py-3 text-sm text-primary">
           This import has already been persisted to{" "}
           <Link href={`/admin/payroll/${batch.period.id}`} className="font-semibold underline">
             {batch.period.label}
@@ -86,22 +86,22 @@ export default async function PayrollImportPreviewPage({
           .
         </div>
       ) : (
-        <form action={confirmAction} className="mb-6 rounded-xl border border-[#ddd6ca] bg-white p-5">
+        <form action={confirmAction} className="mb-6 rounded-xl border border-border bg-card p-5">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
             <div className="flex-1">
-              <label htmlFor="label" className="text-sm font-medium text-[#374151]">
+              <label htmlFor="label" className="text-sm font-medium text-foreground">
                 Draft period label
               </label>
               <input
                 id="label"
                 name="label"
                 defaultValue={getDefaultLabel(data.periodStart, data.periodEnd)}
-                className="mt-1 w-full rounded-lg border border-[#d1d5db] px-3 py-2 text-sm outline-none focus:border-[#2f4f3e] focus:ring-1 focus:ring-[#2f4f3e]"
+                className="mt-1 w-full rounded-lg border border-input px-3 py-2 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
               />
             </div>
             <button
               type="submit"
-              className="rounded-lg bg-[#2f4f3e] px-5 py-2 text-sm font-semibold text-white hover:bg-[#274636]"
+              className="rounded-lg bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
             >
               Create draft period
             </button>
@@ -130,45 +130,45 @@ export default async function PayrollImportPreviewPage({
         </section>
       ) : null}
 
-      <section className="mb-6 overflow-hidden rounded-xl border border-[#ddd6ca] bg-white">
-        <div className="border-b border-[#ddd6ca] bg-[#f5f0e8] px-4 py-3">
-          <h2 className="text-sm font-semibold text-[#374151]">Parsed employees</h2>
+      <section className="mb-6 overflow-hidden rounded-xl border border-border bg-card">
+        <div className="border-b border-border bg-background px-4 py-3">
+          <h2 className="text-sm font-semibold text-foreground">Parsed employees</h2>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="border-b border-[#ddd6ca]">
+            <thead className="border-b border-border">
               <tr>
-                <th className="px-4 py-2 text-left text-xs font-semibold text-[#6b7280]">Name</th>
-                <th className="px-4 py-2 text-left text-xs font-semibold text-[#6b7280]">Position</th>
-                <th className="px-4 py-2 text-right text-xs font-semibold text-[#6b7280]">Worked hrs</th>
-                <th className="px-4 py-2 text-right text-xs font-semibold text-[#6b7280]">Days</th>
-                <th className="px-4 py-2 text-right text-xs font-semibold text-[#6b7280]">Daily</th>
-                <th className="px-4 py-2 text-right text-xs font-semibold text-[#6b7280]">Monthly</th>
-                <th className="px-4 py-2 text-right text-xs font-semibold text-[#6b7280]">OT hrs</th>
-                <th className="px-4 py-2 text-right text-xs font-semibold text-[#6b7280]">Tardy min</th>
-                <th className="px-4 py-2 text-right text-xs font-semibold text-[#6b7280]">Tardy ded.</th>
-                <th className="px-4 py-2 text-right text-xs font-semibold text-[#6b7280]">Loans</th>
-                <th className="px-4 py-2 text-right text-xs font-semibold text-[#6b7280]">Adjustments</th>
-                <th className="px-4 py-2 text-right text-xs font-semibold text-[#6b7280]">Sheet gross</th>
+                <th className="px-4 py-2 text-left text-xs font-semibold text-muted-foreground">Name</th>
+                <th className="px-4 py-2 text-left text-xs font-semibold text-muted-foreground">Position</th>
+                <th className="px-4 py-2 text-right text-xs font-semibold text-muted-foreground">Worked hrs</th>
+                <th className="px-4 py-2 text-right text-xs font-semibold text-muted-foreground">Days</th>
+                <th className="px-4 py-2 text-right text-xs font-semibold text-muted-foreground">Daily</th>
+                <th className="px-4 py-2 text-right text-xs font-semibold text-muted-foreground">Monthly</th>
+                <th className="px-4 py-2 text-right text-xs font-semibold text-muted-foreground">OT hrs</th>
+                <th className="px-4 py-2 text-right text-xs font-semibold text-muted-foreground">Tardy min</th>
+                <th className="px-4 py-2 text-right text-xs font-semibold text-muted-foreground">Tardy ded.</th>
+                <th className="px-4 py-2 text-right text-xs font-semibold text-muted-foreground">Loans</th>
+                <th className="px-4 py-2 text-right text-xs font-semibold text-muted-foreground">Adjustments</th>
+                <th className="px-4 py-2 text-right text-xs font-semibold text-muted-foreground">Sheet gross</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#f0ebe3]">
+            <tbody className="divide-y divide-border">
               {data.employees.map((employee) => (
-                <tr key={`${employee.name}-${employee.position}`} className="hover:bg-[#faf8f4]">
-                  <td className="px-4 py-2 font-medium text-[#1a2e1f]">{employee.name}</td>
-                  <td className="px-4 py-2 text-[#6b7280]">{employee.position || "None"}</td>
-                  <td className="px-4 py-2 text-right text-[#374151]">{formatNumber(employee.workedHours)}</td>
-                  <td className="px-4 py-2 text-right text-[#374151]">{formatNumber(employee.workedDays)}</td>
-                  <td className="px-4 py-2 text-right text-[#374151]">{formatNumber(employee.dailyRate)}</td>
-                  <td className="px-4 py-2 text-right text-[#374151]">{formatNumber(employee.monthlyRate)}</td>
-                  <td className="px-4 py-2 text-right text-[#374151]">
+                <tr key={`${employee.name}-${employee.position}`} className="hover:bg-muted/70">
+                  <td className="px-4 py-2 font-medium text-foreground">{employee.name}</td>
+                  <td className="px-4 py-2 text-muted-foreground">{employee.position || "None"}</td>
+                  <td className="px-4 py-2 text-right text-foreground">{formatNumber(employee.workedHours)}</td>
+                  <td className="px-4 py-2 text-right text-foreground">{formatNumber(employee.workedDays)}</td>
+                  <td className="px-4 py-2 text-right text-foreground">{formatNumber(employee.dailyRate)}</td>
+                  <td className="px-4 py-2 text-right text-foreground">{formatNumber(employee.monthlyRate)}</td>
+                  <td className="px-4 py-2 text-right text-foreground">
                     {formatNumber((employee.rdOtHours ?? 0) + (employee.extendedOtHours ?? 0))}
                   </td>
-                  <td className="px-4 py-2 text-right text-[#374151]">{formatNumber(employee.tardinessMinutes)}</td>
-                  <td className="px-4 py-2 text-right text-[#374151]">{formatNumber(employee.tardinessDeduction)}</td>
-                  <td className="px-4 py-2 text-right text-[#374151]">{formatNumber(employee.loans)}</td>
-                  <td className="px-4 py-2 text-right text-[#374151]">{formatNumber(employee.salaryAdjustments)}</td>
-                  <td className="px-4 py-2 text-right text-[#374151]">{formatNumber(employee.grossIncome)}</td>
+                  <td className="px-4 py-2 text-right text-foreground">{formatNumber(employee.tardinessMinutes)}</td>
+                  <td className="px-4 py-2 text-right text-foreground">{formatNumber(employee.tardinessDeduction)}</td>
+                  <td className="px-4 py-2 text-right text-foreground">{formatNumber(employee.loans)}</td>
+                  <td className="px-4 py-2 text-right text-foreground">{formatNumber(employee.salaryAdjustments)}</td>
+                  <td className="px-4 py-2 text-right text-foreground">{formatNumber(employee.grossIncome)}</td>
                 </tr>
               ))}
             </tbody>
@@ -177,9 +177,9 @@ export default async function PayrollImportPreviewPage({
       </section>
 
       {reconciliation?.text ? (
-        <section className="rounded-xl border border-[#ddd6ca] bg-white p-4">
-          <h2 className="mb-3 text-sm font-semibold text-[#374151]">Reconciliation report</h2>
-          <pre className="max-h-96 overflow-auto whitespace-pre-wrap rounded-lg bg-[#f8f5ef] p-3 text-xs text-[#374151]">
+        <section className="rounded-xl border border-border bg-card p-4">
+          <h2 className="mb-3 text-sm font-semibold text-foreground">Reconciliation report</h2>
+          <pre className="max-h-96 overflow-auto whitespace-pre-wrap rounded-lg bg-muted p-3 text-xs text-foreground">
             {reconciliation.text}
           </pre>
         </section>
@@ -200,11 +200,11 @@ function SummaryCard({
   return (
     <div
       className={`rounded-xl border px-4 py-3 ${
-        highlight ? "border-yellow-200 bg-yellow-50" : "border-[#ddd6ca] bg-white"
+        highlight ? "border-yellow-200 bg-yellow-50" : "border-border bg-card"
       }`}
     >
-      <p className="text-xs text-[#6b7280]">{label}</p>
-      <p className="mt-1 text-lg font-semibold text-[#1a2e1f]">{value}</p>
+      <p className="text-xs text-muted-foreground">{label}</p>
+      <p className="mt-1 text-lg font-semibold text-foreground">{value}</p>
     </div>
   );
 }

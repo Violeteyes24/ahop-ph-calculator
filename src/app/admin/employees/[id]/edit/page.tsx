@@ -33,10 +33,10 @@ export default async function EditEmployeePage({
   return (
     <div className="max-w-2xl">
       <div className="mb-6">
-        <Link href={`/admin/employees/${id}`} className="text-sm text-[#6b7280] hover:text-[#1a2e1f]">
+        <Link href={`/admin/employees/${id}`} className="text-sm text-muted-foreground hover:text-foreground">
           ← Back to employee
         </Link>
-        <h1 className="mt-2 text-2xl font-semibold tracking-tight text-[#1a2e1f]">Edit employee</h1>
+        <h1 className="mt-2 text-2xl font-semibold tracking-tight text-foreground">Edit employee</h1>
       </div>
       <EditEmployeeForm id={id} defaults={defaults} />
     </div>
