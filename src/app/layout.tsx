@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Fira_Sans } from "next/font/google";
+import { ThemeToggle } from "@/components/theme-toggle";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -13,14 +14,30 @@ const firaSans = Fira_Sans({
   display: "swap",
 });
 
+const themeInitScript = `
+try {
+  var theme = window.localStorage.getItem("apnea-dynamics-theme") === "dark" ? "dark" : "light";
+  document.documentElement.classList.toggle("dark", theme === "dark");
+  document.documentElement.dataset.theme = theme;
+} catch {}
+`;
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${firaSans.className} h-full antialiased font-sans`}>
-      <body className="min-h-full flex flex-col">{children}</body>
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={`${firaSans.className} h-full antialiased font-sans`}
+    >
+      <body className="min-h-full flex flex-col">
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+        {children}
+        <ThemeToggle />
+      </body>
     </html>
   );
 }
