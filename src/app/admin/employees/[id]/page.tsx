@@ -48,13 +48,13 @@ export default async function EmployeeViewPage({
     <div className="max-w-3xl">
       <div className="mb-6 flex items-start justify-between">
         <div>
-          <Link href="/admin/employees" className="text-sm text-[#6b7280] hover:text-[#1a2e1f]">
+          <Link href="/admin/employees" className="text-sm text-muted-foreground hover:text-foreground">
             ← Back to employees
           </Link>
-          <h1 className="mt-2 text-2xl font-semibold tracking-tight text-[#1a2e1f]">
+          <h1 className="mt-2 text-2xl font-semibold tracking-tight text-foreground">
             {employee.fullName}
           </h1>
-          <p className="text-sm text-[#6b7280]">{employee.position || "No position set"}</p>
+          <p className="text-sm text-muted-foreground">{employee.position || "No position set"}</p>
         </div>
         <div className="flex gap-2">
           <form action={toggleActive}>
@@ -71,7 +71,7 @@ export default async function EmployeeViewPage({
           </form>
           <Link
             href={`/admin/employees/${id}/edit`}
-            className="rounded-lg bg-[#2f4f3e] px-4 py-2 text-sm font-semibold text-white hover:bg-[#274636]"
+            className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
           >
             Edit
           </Link>
@@ -79,8 +79,8 @@ export default async function EmployeeViewPage({
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <div className="rounded-xl border border-[#ddd6ca] bg-white p-5">
-          <h2 className="mb-4 text-xs font-semibold uppercase tracking-[0.12em] text-[#5c665f]">Profile</h2>
+        <div className="rounded-xl border border-border bg-card p-5">
+          <h2 className="mb-4 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">Profile</h2>
           <dl className="grid gap-3 text-sm">
             <Row label="Date started" value={toDateLabel(employee.dateStarted)} />
             <Row label="Employment stage" value={employee.employmentStage} />
@@ -103,8 +103,8 @@ export default async function EmployeeViewPage({
           </dl>
         </div>
 
-        <div className="rounded-xl border border-[#ddd6ca] bg-white p-5">
-          <h2 className="mb-4 text-xs font-semibold uppercase tracking-[0.12em] text-[#5c665f]">Account</h2>
+        <div className="rounded-xl border border-border bg-card p-5">
+          <h2 className="mb-4 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">Account</h2>
           <dl className="grid gap-3 text-sm">
             <Row label="Email" value={employee.user?.email ?? "No account"} />
             <Row label="Role" value={employee.user?.role ?? "—"} />
@@ -114,29 +114,29 @@ export default async function EmployeeViewPage({
       </div>
 
       {employee.payrollSnapshots.length > 0 ? (
-        <div className="mt-4 rounded-xl border border-[#ddd6ca] bg-white p-5">
-          <h2 className="mb-4 text-xs font-semibold uppercase tracking-[0.12em] text-[#5c665f]">
+        <div className="mt-4 rounded-xl border border-border bg-card p-5">
+          <h2 className="mb-4 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
             Recent payroll history
           </h2>
           <table className="w-full text-sm">
-            <thead className="border-b border-[#f0ebe3]">
+            <thead className="border-b border-border">
               <tr>
-                <th className="pb-2 text-left font-semibold text-[#374151]">Period</th>
-                <th className="pb-2 text-right font-semibold text-[#374151]">Gross</th>
-                <th className="pb-2 text-right font-semibold text-[#374151]">Net Pay</th>
-                <th className="pb-2 text-right font-semibold text-[#374151]">AHOP</th>
+                <th className="pb-2 text-left font-semibold text-foreground">Period</th>
+                <th className="pb-2 text-right font-semibold text-foreground">Gross</th>
+                <th className="pb-2 text-right font-semibold text-foreground">Net Pay</th>
+                <th className="pb-2 text-right font-semibold text-foreground">AHOP</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#f0ebe3]">
+            <tbody className="divide-y divide-border">
               {employee.payrollSnapshots.map((snap) => (
                 <tr key={snap.id}>
-                  <td className="py-2 text-[#374151]">
+                  <td className="py-2 text-foreground">
                     {snap.period?.label ??
                       `${toDateLabel(snap.periodStart)} – ${toDateLabel(snap.periodEnd)}`}
                   </td>
-                  <td className="py-2 text-right text-[#374151]">{toPeso(snap.grossWithAhop)}</td>
-                  <td className="py-2 text-right font-medium text-[#1a2e1f]">{toPeso(snap.netPay)}</td>
-                  <td className="py-2 text-right text-[#6b7280]">{toPeso(snap.ahopTopup)}</td>
+                  <td className="py-2 text-right text-foreground">{toPeso(snap.grossWithAhop)}</td>
+                  <td className="py-2 text-right font-medium text-foreground">{toPeso(snap.netPay)}</td>
+                  <td className="py-2 text-right text-muted-foreground">{toPeso(snap.ahopTopup)}</td>
                 </tr>
               ))}
             </tbody>
@@ -150,8 +150,8 @@ export default async function EmployeeViewPage({
 function Row({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-start justify-between gap-4">
-      <dt className="text-[#6b7280]">{label}</dt>
-      <dd className="text-right font-medium text-[#1a2e1f]">{value}</dd>
+      <dt className="text-muted-foreground">{label}</dt>
+      <dd className="text-right font-medium text-foreground">{value}</dd>
     </div>
   );
 }

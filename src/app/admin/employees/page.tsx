@@ -29,12 +29,12 @@ export default async function EmployeesPage({
     <div>
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-[#1a2e1f]">Employees</h1>
-          <p className="mt-1 text-sm text-[#6b7280]">{employees.length} employee{employees.length !== 1 ? "s" : ""}</p>
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">Employees</h1>
+          <p className="mt-1 text-sm text-muted-foreground">{employees.length} employee{employees.length !== 1 ? "s" : ""}</p>
         </div>
         <Link
           href="/admin/employees/new"
-          className="rounded-lg bg-[#2f4f3e] px-4 py-2 text-sm font-semibold text-white hover:bg-[#274636]"
+          className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
         >
           Add employee
         </Link>
@@ -45,49 +45,49 @@ export default async function EmployeesPage({
           name="q"
           defaultValue={q}
           placeholder="Search by name…"
-          className="w-full max-w-sm rounded-lg border border-[#d1d5db] px-3 py-2 text-sm outline-none focus:border-[#2f4f3e] focus:ring-1 focus:ring-[#2f4f3e]"
+          className="w-full max-w-sm rounded-lg border border-input px-3 py-2 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
         />
       </form>
 
-      <div className="rounded-xl border border-[#ddd6ca] bg-white overflow-hidden">
+      <div className="rounded-xl border border-border bg-card overflow-hidden">
         <table className="w-full text-sm">
-          <thead className="border-b border-[#ddd6ca] bg-[#f5f0e8]">
+          <thead className="border-b border-border bg-background">
             <tr>
-              <th className="px-4 py-3 text-left font-semibold text-[#374151]">Name</th>
-              <th className="px-4 py-3 text-left font-semibold text-[#374151]">Position</th>
-              <th className="px-4 py-3 text-left font-semibold text-[#374151]">Salary Type</th>
-              <th className="px-4 py-3 text-left font-semibold text-[#374151]">Rate</th>
-              <th className="px-4 py-3 text-left font-semibold text-[#374151]">Stage</th>
-              <th className="px-4 py-3 text-left font-semibold text-[#374151]">Status</th>
+              <th className="px-4 py-3 text-left font-semibold text-foreground">Name</th>
+              <th className="px-4 py-3 text-left font-semibold text-foreground">Position</th>
+              <th className="px-4 py-3 text-left font-semibold text-foreground">Salary Type</th>
+              <th className="px-4 py-3 text-left font-semibold text-foreground">Rate</th>
+              <th className="px-4 py-3 text-left font-semibold text-foreground">Stage</th>
+              <th className="px-4 py-3 text-left font-semibold text-foreground">Status</th>
               <th className="px-4 py-3" />
             </tr>
           </thead>
-          <tbody className="divide-y divide-[#f0ebe3]">
+          <tbody className="divide-y divide-border">
             {employees.length === 0 ? (
               <tr>
-                <td colSpan={7} className="px-4 py-8 text-center text-[#9ca3af]">
+                <td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">
                   No employees found.{" "}
-                  <Link href="/admin/employees/new" className="text-[#2f4f3e] underline">
+                  <Link href="/admin/employees/new" className="text-primary underline">
                     Add the first one.
                   </Link>
                 </td>
               </tr>
             ) : (
               employees.map((emp) => (
-                <tr key={emp.id} className="hover:bg-[#faf8f4]">
-                  <td className="px-4 py-3 font-medium text-[#1a2e1f]">{emp.fullName}</td>
-                  <td className="px-4 py-3 text-[#6b7280]">{emp.position || "—"}</td>
+                <tr key={emp.id} className="hover:bg-muted/70">
+                  <td className="px-4 py-3 font-medium text-foreground">{emp.fullName}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{emp.position || "—"}</td>
                   <td className="px-4 py-3">
-                    <span className="rounded-full bg-[#edf3ee] px-2 py-0.5 text-xs font-medium text-[#2f4f3e]">
+                    <span className="rounded-full bg-accent px-2 py-0.5 text-xs font-medium text-primary">
                       {emp.salaryType}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-[#374151]">
+                  <td className="px-4 py-3 text-foreground">
                     {emp.salaryType === "DAILY"
                       ? `${toPeso(emp.dailyRate)}/day`
                       : `${toPeso(emp.monthlyRate)}/mo`}
                   </td>
-                  <td className="px-4 py-3 text-[#6b7280]">{emp.employmentStage}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{emp.employmentStage}</td>
                   <td className="px-4 py-3">
                     <span
                       className={`rounded-full px-2 py-0.5 text-xs font-medium ${
@@ -102,14 +102,14 @@ export default async function EmployeesPage({
                   <td className="px-4 py-3 text-right">
                     <Link
                       href={`/admin/employees/${emp.id}`}
-                      className="text-xs font-medium text-[#2f4f3e] hover:underline"
+                      className="text-xs font-medium text-primary hover:underline"
                     >
                       View
                     </Link>
                     {" · "}
                     <Link
                       href={`/admin/employees/${emp.id}/edit`}
-                      className="text-xs font-medium text-[#2f4f3e] hover:underline"
+                      className="text-xs font-medium text-primary hover:underline"
                     >
                       Edit
                     </Link>

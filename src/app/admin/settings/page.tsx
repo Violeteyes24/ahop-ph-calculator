@@ -17,49 +17,49 @@ export default async function SettingsPage() {
   return (
     <div className="max-w-2xl">
       <div className="mb-6">
-        <h1 className="text-2xl font-semibold tracking-tight text-[#1a2e1f]">Settings</h1>
-        <p className="mt-1 text-sm text-[#6b7280]">
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground">Settings</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
           Manage contribution rate configurations for SSS, PhilHealth, and Pag-IBIG.
         </p>
       </div>
 
       {/* Existing configs */}
       <section className="mb-8">
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-[0.1em] text-[#5c665f]">
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-[0.1em] text-muted-foreground">
           Rate configurations
         </h2>
-        <div className="rounded-xl border border-[#ddd6ca] bg-white overflow-hidden">
+        <div className="rounded-xl border border-border bg-card overflow-hidden">
           <table className="w-full text-sm">
-            <thead className="border-b border-[#ddd6ca] bg-[#f5f0e8]">
+            <thead className="border-b border-border bg-background">
               <tr>
-                <th className="px-4 py-3 text-left font-semibold text-[#374151]">Name</th>
-                <th className="px-4 py-3 text-right font-semibold text-[#374151]">PhilHealth %</th>
-                <th className="px-4 py-3 text-right font-semibold text-[#374151]">PagIbig EE/ER</th>
-                <th className="px-4 py-3 text-left font-semibold text-[#374151]">Effective from</th>
-                <th className="px-4 py-3 text-left font-semibold text-[#374151]">Effective to</th>
+                <th className="px-4 py-3 text-left font-semibold text-foreground">Name</th>
+                <th className="px-4 py-3 text-right font-semibold text-foreground">PhilHealth %</th>
+                <th className="px-4 py-3 text-right font-semibold text-foreground">PagIbig EE/ER</th>
+                <th className="px-4 py-3 text-left font-semibold text-foreground">Effective from</th>
+                <th className="px-4 py-3 text-left font-semibold text-foreground">Effective to</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#f0ebe3]">
+            <tbody className="divide-y divide-border">
               {configs.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-4 py-6 text-center text-[#9ca3af]">
+                  <td colSpan={5} className="px-4 py-6 text-center text-muted-foreground">
                     No configurations yet.
                   </td>
                 </tr>
               ) : (
                 configs.map((config) => (
-                  <tr key={config.id} className="hover:bg-[#faf8f4]">
-                    <td className="px-4 py-3 font-medium text-[#1a2e1f]">{config.name}</td>
-                    <td className="px-4 py-3 text-right text-[#374151]">
+                  <tr key={config.id} className="hover:bg-muted/70">
+                    <td className="px-4 py-3 font-medium text-foreground">{config.name}</td>
+                    <td className="px-4 py-3 text-right text-foreground">
                       {Number(config.philHealthRate)}%
                     </td>
-                    <td className="px-4 py-3 text-right text-[#374151]">
+                    <td className="px-4 py-3 text-right text-foreground">
                       ₱{Number(config.pagIbigEmployeeFixed)} / ₱{Number(config.pagIbigEmployerFixed)}
                     </td>
-                    <td className="px-4 py-3 text-[#6b7280]">
+                    <td className="px-4 py-3 text-muted-foreground">
                       {toDateLabel(config.effectiveFrom)}
                     </td>
-                    <td className="px-4 py-3 text-[#6b7280]">
+                    <td className="px-4 py-3 text-muted-foreground">
                       {config.effectiveTo ? toDateLabel(config.effectiveTo) : "Current"}
                     </td>
                   </tr>
@@ -72,7 +72,7 @@ export default async function SettingsPage() {
 
       {/* Add new config */}
       <section>
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-[0.1em] text-[#5c665f]">
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-[0.1em] text-muted-foreground">
           Add rate configuration
         </h2>
         <SettingsForm />

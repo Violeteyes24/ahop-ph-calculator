@@ -15,24 +15,24 @@ export function LoginForm({ authError }: { authError?: string }) {
   const shownError = state.error ?? authError;
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[#f5f0e8] px-4">
-      <div className="w-full max-w-sm rounded-2xl border border-[#ddd6ca] bg-white p-8 shadow-sm">
+    <main className="flex min-h-screen items-center justify-center bg-background px-4">
+      <div className="w-full max-w-sm rounded-2xl border border-border bg-card p-8 shadow-sm">
         <div className="mb-6">
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#5c665f]">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
             Apnea Dynamics Inc.
           </p>
-          <h1 className="mt-1 text-2xl font-semibold tracking-tight text-[#1a2e1f]">
+          <h1 className="mt-1 text-2xl font-semibold tracking-tight text-foreground">
             Payroll System
           </h1>
-          <p className="mt-1 text-sm text-[#6b7280]">Finance personnel sign in</p>
+          <p className="mt-1 text-sm text-muted-foreground">Finance personnel sign in</p>
         </div>
 
         <form action={signInWithGoogleAction}>
           <button
             type="submit"
-            className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-[#d1d5db] bg-white px-4 py-2.5 text-sm font-semibold text-[#1f2937] hover:bg-[#f9fafb]"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-input bg-card px-4 py-2.5 text-sm font-semibold text-foreground hover:bg-muted"
           >
-            <span className="flex h-5 w-5 items-center justify-center rounded-full border border-[#d1d5db] text-xs font-bold">
+            <span className="flex h-5 w-5 items-center justify-center rounded-full border border-input text-xs font-bold">
               G
             </span>
             Continue with Google
@@ -40,14 +40,14 @@ export function LoginForm({ authError }: { authError?: string }) {
         </form>
 
         <div className="my-5 flex items-center gap-3">
-          <div className="h-px flex-1 bg-[#e5e7eb]" />
-          <span className="text-xs uppercase tracking-[0.14em] text-[#9ca3af]">or</span>
-          <div className="h-px flex-1 bg-[#e5e7eb]" />
+          <div className="h-px flex-1 bg-border" />
+          <span className="text-xs uppercase tracking-[0.14em] text-muted-foreground">or</span>
+          <div className="h-px flex-1 bg-border" />
         </div>
 
         <form action={formAction} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="email" className="text-sm font-medium text-[#374151]">
+            <label htmlFor="email" className="text-sm font-medium text-foreground">
               Email address
             </label>
             <input
@@ -56,13 +56,13 @@ export function LoginForm({ authError }: { authError?: string }) {
               type="email"
               autoComplete="email"
               required
-              className="rounded-lg border border-[#d1d5db] px-3 py-2 text-sm outline-none focus:border-[#2f4f3e] focus:ring-1 focus:ring-[#2f4f3e]"
+              className="rounded-lg border border-input px-3 py-2 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
               placeholder="you@apneadynamics.org"
             />
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="password" className="text-sm font-medium text-[#374151]">
+            <label htmlFor="password" className="text-sm font-medium text-foreground">
               Password
             </label>
             <input
@@ -71,7 +71,7 @@ export function LoginForm({ authError }: { authError?: string }) {
               type="password"
               autoComplete="current-password"
               required
-              className="rounded-lg border border-[#d1d5db] px-3 py-2 text-sm outline-none focus:border-[#2f4f3e] focus:ring-1 focus:ring-[#2f4f3e]"
+              className="rounded-lg border border-input px-3 py-2 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
             />
           </div>
 
@@ -84,7 +84,7 @@ export function LoginForm({ authError }: { authError?: string }) {
           <button
             type="submit"
             disabled={isPending}
-            className="mt-1 rounded-lg bg-[#2f4f3e] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#274636] disabled:opacity-60"
+            className="mt-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
           >
             {isPending ? "Signing in..." : "Sign in with password"}
           </button>
@@ -92,7 +92,7 @@ export function LoginForm({ authError }: { authError?: string }) {
 
         <Link
           href="/calculator"
-          className="mt-5 block text-center text-sm font-medium text-[#2f4f3e] hover:underline"
+          className="mt-5 block text-center text-sm font-medium text-primary hover:underline"
         >
           Use the salary calculator as a guest
         </Link>

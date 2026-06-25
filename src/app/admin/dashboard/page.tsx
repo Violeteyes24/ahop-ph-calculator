@@ -32,8 +32,8 @@ export default async function DashboardPage() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-2xl font-semibold tracking-tight text-[#1a2e1f]">Dashboard</h1>
-        <p className="mt-1 text-sm text-[#6b7280]">Overview of Apnea Dynamics payroll</p>
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground">Dashboard</h1>
+        <p className="mt-1 text-sm text-muted-foreground">Overview of Apnea Dynamics payroll</p>
       </div>
 
       {/* Stat cards */}
@@ -70,25 +70,25 @@ export default async function DashboardPage() {
       <div className="mb-6 flex flex-wrap gap-3">
         <Link
           href="/admin/payroll/new"
-          className="rounded-lg bg-[#2f4f3e] px-4 py-2 text-sm font-semibold text-white hover:bg-[#274636]"
+          className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
         >
           New payroll period
         </Link>
         <Link
           href="/admin/payroll/import"
-          className="rounded-lg border border-[#d1d5db] bg-white px-4 py-2 text-sm font-medium text-[#374151] hover:bg-[#f5f0e8]"
+          className="rounded-lg border border-input bg-card px-4 py-2 text-sm font-medium text-foreground hover:bg-muted"
         >
           Import Excel
         </Link>
         <Link
           href="/admin/employees/new"
-          className="rounded-lg border border-[#d1d5db] bg-white px-4 py-2 text-sm font-medium text-[#374151] hover:bg-[#f5f0e8]"
+          className="rounded-lg border border-input bg-card px-4 py-2 text-sm font-medium text-foreground hover:bg-muted"
         >
           Add employee
         </Link>
         <Link
           href="/admin/reports"
-          className="rounded-lg border border-[#d1d5db] bg-white px-4 py-2 text-sm font-medium text-[#374151] hover:bg-[#f5f0e8]"
+          className="rounded-lg border border-input bg-card px-4 py-2 text-sm font-medium text-foreground hover:bg-muted"
         >
           View reports
         </Link>
@@ -96,21 +96,21 @@ export default async function DashboardPage() {
 
       {/* Recent periods */}
       {recentPeriods.length > 0 ? (
-        <div className="rounded-xl border border-[#ddd6ca] bg-white overflow-hidden">
-          <div className="border-b border-[#ddd6ca] bg-[#f5f0e8] px-4 py-3">
-            <h2 className="text-sm font-semibold text-[#374151]">Recent payroll periods</h2>
+        <div className="rounded-xl border border-border bg-card overflow-hidden">
+          <div className="border-b border-border bg-background px-4 py-3">
+            <h2 className="text-sm font-semibold text-foreground">Recent payroll periods</h2>
           </div>
           <table className="w-full text-sm">
-            <thead className="border-b border-[#ddd6ca]">
+            <thead className="border-b border-border">
               <tr>
-                <th className="px-4 py-2 text-left text-xs font-semibold text-[#6b7280]">Period</th>
-                <th className="px-4 py-2 text-right text-xs font-semibold text-[#6b7280]">Employees</th>
-                <th className="px-4 py-2 text-right text-xs font-semibold text-[#6b7280]">Total gross</th>
-                <th className="px-4 py-2 text-right text-xs font-semibold text-[#6b7280]">Total net</th>
+                <th className="px-4 py-2 text-left text-xs font-semibold text-muted-foreground">Period</th>
+                <th className="px-4 py-2 text-right text-xs font-semibold text-muted-foreground">Employees</th>
+                <th className="px-4 py-2 text-right text-xs font-semibold text-muted-foreground">Total gross</th>
+                <th className="px-4 py-2 text-right text-xs font-semibold text-muted-foreground">Total net</th>
                 <th className="px-4 py-2" />
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#f0ebe3]">
+            <tbody className="divide-y divide-border">
               {recentPeriods.map((period) => {
                 const totalGross = period.snapshots.reduce(
                   (s, snap) => s + Number(snap.grossWithAhop),
@@ -121,19 +121,19 @@ export default async function DashboardPage() {
                   0
                 );
                 return (
-                  <tr key={period.id} className="hover:bg-[#faf8f4]">
-                    <td className="px-4 py-3 font-medium text-[#1a2e1f]">{period.label}</td>
-                    <td className="px-4 py-3 text-right text-[#6b7280]">
+                  <tr key={period.id} className="hover:bg-muted/70">
+                    <td className="px-4 py-3 font-medium text-foreground">{period.label}</td>
+                    <td className="px-4 py-3 text-right text-muted-foreground">
                       {period._count.snapshots}
                     </td>
-                    <td className="px-4 py-3 text-right text-[#374151]">{toPeso(totalGross)}</td>
-                    <td className="px-4 py-3 text-right font-medium text-[#1a2e1f]">
+                    <td className="px-4 py-3 text-right text-foreground">{toPeso(totalGross)}</td>
+                    <td className="px-4 py-3 text-right font-medium text-foreground">
                       {toPeso(totalNet)}
                     </td>
                     <td className="px-4 py-3 text-right">
                       <Link
                         href={`/admin/payroll/${period.id}/results`}
-                        className="text-xs font-medium text-[#2f4f3e] hover:underline"
+                        className="text-xs font-medium text-primary hover:underline"
                       >
                         View
                       </Link>
@@ -145,9 +145,9 @@ export default async function DashboardPage() {
           </table>
         </div>
       ) : (
-        <div className="rounded-xl border border-[#ddd6ca] bg-white px-6 py-12 text-center text-sm text-[#9ca3af]">
+        <div className="rounded-xl border border-border bg-card px-6 py-12 text-center text-sm text-muted-foreground">
           No completed payroll periods yet.{" "}
-          <Link href="/admin/payroll/new" className="text-[#2f4f3e] underline">
+          <Link href="/admin/payroll/new" className="text-primary underline">
             Create the first one.
           </Link>
         </div>
@@ -166,13 +166,13 @@ function StatCard({
   action: { label: string; href: string } | null;
 }) {
   return (
-    <div className="rounded-xl border border-[#ddd6ca] bg-white p-5">
-      <p className="text-xs text-[#6b7280]">{label}</p>
-      <p className="mt-1 text-xl font-semibold text-[#1a2e1f]">{value}</p>
+    <div className="rounded-xl border border-border bg-card p-5">
+      <p className="text-xs text-muted-foreground">{label}</p>
+      <p className="mt-1 text-xl font-semibold text-foreground">{value}</p>
       {action ? (
         <Link
           href={action.href}
-          className="mt-3 inline-block text-xs font-medium text-[#2f4f3e] hover:underline"
+          className="mt-3 inline-block text-xs font-medium text-primary hover:underline"
         >
           {action.label} →
         </Link>

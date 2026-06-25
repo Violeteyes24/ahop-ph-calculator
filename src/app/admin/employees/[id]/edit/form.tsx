@@ -26,13 +26,13 @@ export function EditEmployeeForm({ id, defaults }: { id: string; defaults: Defau
   const [state, formAction, isPending] = useActionState(boundAction, initialState);
 
   return (
-    <form action={formAction} className="rounded-xl border border-[#ddd6ca] bg-white p-6">
+    <form action={formAction} className="rounded-xl border border-border bg-card p-6">
       <EmployeeFormFields defaults={defaults} />
 
-      <div className="mt-6 border-t border-[#f0ebe3] pt-6">
-        <h3 className="mb-4 text-sm font-semibold text-[#374151]">Change password (optional)</h3>
+      <div className="mt-6 border-t border-border pt-6">
+        <h3 className="mb-4 text-sm font-semibold text-foreground">Change password (optional)</h3>
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="password" className="text-sm font-medium text-[#374151]">
+          <label htmlFor="password" className="text-sm font-medium text-foreground">
             New password
           </label>
           <input
@@ -40,7 +40,7 @@ export function EditEmployeeForm({ id, defaults }: { id: string; defaults: Defau
             name="password"
             type="text"
             minLength={8}
-            className="rounded-lg border border-[#d1d5db] px-3 py-2 text-sm outline-none focus:border-[#2f4f3e] focus:ring-1 focus:ring-[#2f4f3e]"
+            className="rounded-lg border border-input px-3 py-2 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
             placeholder="Leave blank to keep current password"
           />
         </div>
@@ -54,13 +54,13 @@ export function EditEmployeeForm({ id, defaults }: { id: string; defaults: Defau
         <button
           type="submit"
           disabled={isPending}
-          className="rounded-lg bg-[#2f4f3e] px-5 py-2 text-sm font-semibold text-white hover:bg-[#274636] disabled:opacity-60"
+          className="rounded-lg bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
         >
           {isPending ? "Saving…" : "Save changes"}
         </button>
         <Link
           href={`/admin/employees/${id}`}
-          className="rounded-lg border border-[#d1d5db] px-5 py-2 text-sm font-medium text-[#374151] hover:bg-[#f5f0e8]"
+          className="rounded-lg border border-input px-5 py-2 text-sm font-medium text-foreground hover:bg-muted"
         >
           Cancel
         </Link>

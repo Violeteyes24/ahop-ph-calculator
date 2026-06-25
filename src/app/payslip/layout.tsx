@@ -7,19 +7,19 @@ export default async function PayslipLayout({ children }: { children: React.Reac
   await requireEmployee();
 
   return (
-    <div className="min-h-screen bg-[#f5f0e8]">
-      <header className="border-b border-[#ddd6ca] bg-white px-6 py-3">
+    <div className="min-h-screen bg-background">
+      <header className="border-b border-border bg-card px-6 py-3">
         <div className="mx-auto flex max-w-3xl items-center justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#5c665f]">
+            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
               Apnea Dynamics Inc.
             </p>
-            <p className="text-xs text-[#9ca3af]">My Payslips</p>
+            <p className="text-xs text-muted-foreground">My Payslips</p>
           </div>
           <form action={logoutAction}>
             <button
               type="submit"
-              className="rounded-lg border border-[#d1d5db] px-3 py-1.5 text-xs font-medium text-[#374151] hover:bg-[#f5f0e8]"
+              className="rounded-lg border border-input px-3 py-1.5 text-xs font-medium text-foreground hover:bg-muted"
             >
               Sign out
             </button>

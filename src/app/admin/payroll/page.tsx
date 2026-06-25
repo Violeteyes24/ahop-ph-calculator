@@ -27,56 +27,56 @@ export default async function PayrollPeriodsPage() {
     <div>
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-[#1a2e1f]">Payroll Periods</h1>
-          <p className="mt-1 text-sm text-[#6b7280]">
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">Payroll Periods</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
             {periods.length} period{periods.length !== 1 ? "s" : ""}
           </p>
         </div>
         <div className="flex gap-2">
           <Link
             href="/admin/payroll/import"
-            className="rounded-lg border border-[#d1d5db] bg-white px-4 py-2 text-sm font-medium text-[#374151] hover:bg-[#f5f0e8]"
+            className="rounded-lg border border-input bg-card px-4 py-2 text-sm font-medium text-foreground hover:bg-muted"
           >
             Import Excel
           </Link>
           <Link
             href="/admin/payroll/new"
-            className="rounded-lg bg-[#2f4f3e] px-4 py-2 text-sm font-semibold text-white hover:bg-[#274636]"
+            className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
           >
             New period
           </Link>
         </div>
       </div>
 
-      <div className="rounded-xl border border-[#ddd6ca] bg-white overflow-hidden">
+      <div className="rounded-xl border border-border bg-card overflow-hidden">
         <table className="w-full text-sm">
-          <thead className="border-b border-[#ddd6ca] bg-[#f5f0e8]">
+          <thead className="border-b border-border bg-background">
             <tr>
-              <th className="px-4 py-3 text-left font-semibold text-[#374151]">Period</th>
-              <th className="px-4 py-3 text-left font-semibold text-[#374151]">Date range</th>
-              <th className="px-4 py-3 text-left font-semibold text-[#374151]">Employees</th>
-              <th className="px-4 py-3 text-left font-semibold text-[#374151]">Status</th>
+              <th className="px-4 py-3 text-left font-semibold text-foreground">Period</th>
+              <th className="px-4 py-3 text-left font-semibold text-foreground">Date range</th>
+              <th className="px-4 py-3 text-left font-semibold text-foreground">Employees</th>
+              <th className="px-4 py-3 text-left font-semibold text-foreground">Status</th>
               <th className="px-4 py-3" />
             </tr>
           </thead>
-          <tbody className="divide-y divide-[#f0ebe3]">
+          <tbody className="divide-y divide-border">
             {periods.length === 0 ? (
               <tr>
-                <td colSpan={5} className="px-4 py-8 text-center text-[#9ca3af]">
+                <td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">
                   No payroll periods yet.{" "}
-                  <Link href="/admin/payroll/new" className="text-[#2f4f3e] underline">
+                  <Link href="/admin/payroll/new" className="text-primary underline">
                     Create the first one.
                   </Link>
                 </td>
               </tr>
             ) : (
               periods.map((period) => (
-                <tr key={period.id} className="hover:bg-[#faf8f4]">
-                  <td className="px-4 py-3 font-medium text-[#1a2e1f]">{period.label}</td>
-                  <td className="px-4 py-3 text-[#6b7280]">
+                <tr key={period.id} className="hover:bg-muted/70">
+                  <td className="px-4 py-3 font-medium text-foreground">{period.label}</td>
+                  <td className="px-4 py-3 text-muted-foreground">
                     {toDateLabel(period.periodStart)} – {toDateLabel(period.periodEnd)}
                   </td>
-                  <td className="px-4 py-3 text-[#374151]">
+                  <td className="px-4 py-3 text-foreground">
                     {period.status === "COMPLETED"
                       ? `${period._count.snapshots} processed`
                       : `${period._count.attendanceEntries} entered`}
@@ -95,7 +95,7 @@ export default async function PayrollPeriodsPage() {
                           ? `/admin/payroll/${period.id}/results`
                           : `/admin/payroll/${period.id}`
                       }
-                      className="text-xs font-medium text-[#2f4f3e] hover:underline"
+                      className="text-xs font-medium text-primary hover:underline"
                     >
                       {period.status === "COMPLETED" ? "View results" : "Enter attendance"}
                     </Link>

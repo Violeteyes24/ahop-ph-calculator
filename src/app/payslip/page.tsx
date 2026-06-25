@@ -41,51 +41,51 @@ export default async function PayslipListPage() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-2xl font-semibold tracking-tight text-[#1a2e1f]">
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground">
           My Payslips
         </h1>
         {employee ? (
-          <p className="mt-1 text-sm text-[#6b7280]">{employee.fullName} · {employee.position ?? ""}</p>
+          <p className="mt-1 text-sm text-muted-foreground">{employee.fullName} · {employee.position ?? ""}</p>
         ) : null}
       </div>
 
       {snapshots.length === 0 ? (
-        <div className="rounded-xl border border-[#ddd6ca] bg-white px-6 py-12 text-center text-sm text-[#9ca3af]">
+        <div className="rounded-xl border border-border bg-card px-6 py-12 text-center text-sm text-muted-foreground">
           No payslips yet. Your payslips will appear here once payroll has been processed.
         </div>
       ) : (
-        <div className="rounded-xl border border-[#ddd6ca] bg-white overflow-hidden">
+        <div className="rounded-xl border border-border bg-card overflow-hidden">
           <table className="w-full text-sm">
-            <thead className="border-b border-[#ddd6ca] bg-[#f5f0e8]">
+            <thead className="border-b border-border bg-background">
               <tr>
-                <th className="px-4 py-3 text-left font-semibold text-[#374151]">Period</th>
-                <th className="px-4 py-3 text-right font-semibold text-[#374151]">Gross</th>
-                <th className="px-4 py-3 text-right font-semibold text-[#374151]">Net Pay</th>
-                <th className="px-4 py-3 text-right font-semibold text-[#374151]">AHOP</th>
+                <th className="px-4 py-3 text-left font-semibold text-foreground">Period</th>
+                <th className="px-4 py-3 text-right font-semibold text-foreground">Gross</th>
+                <th className="px-4 py-3 text-right font-semibold text-foreground">Net Pay</th>
+                <th className="px-4 py-3 text-right font-semibold text-foreground">AHOP</th>
                 <th className="px-4 py-3" />
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#f0ebe3]">
+            <tbody className="divide-y divide-border">
               {snapshots.map((snap) => (
-                <tr key={snap.id} className="hover:bg-[#faf8f4]">
-                  <td className="px-4 py-3 text-[#1a2e1f]">
+                <tr key={snap.id} className="hover:bg-muted/70">
+                  <td className="px-4 py-3 text-foreground">
                     {snap.period?.label ??
                       `${toDateLabel(snap.periodStart)} – ${toDateLabel(snap.periodEnd)}`}
                   </td>
-                  <td className="px-4 py-3 text-right text-[#374151]">
+                  <td className="px-4 py-3 text-right text-foreground">
                     {toPeso(snap.grossWithAhop)}
                   </td>
-                  <td className="px-4 py-3 text-right font-semibold text-[#1a2e1f]">
+                  <td className="px-4 py-3 text-right font-semibold text-foreground">
                     {toPeso(snap.netPay)}
                   </td>
-                  <td className="px-4 py-3 text-right text-[#6b7280]">
+                  <td className="px-4 py-3 text-right text-muted-foreground">
                     {toPeso(snap.ahopTopup)}
                   </td>
                   <td className="px-4 py-3 text-right">
                     {snap.period ? (
                       <Link
                         href={`/payslip/${snap.period.id}`}
-                        className="text-xs font-medium text-[#2f4f3e] hover:underline"
+                        className="text-xs font-medium text-primary hover:underline"
                       >
                         View payslip
                       </Link>

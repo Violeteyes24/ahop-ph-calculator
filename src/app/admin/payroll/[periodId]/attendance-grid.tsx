@@ -296,7 +296,7 @@ export function AttendanceGrid({
             type="button"
             onClick={handleSave}
             disabled={saveStatus === "saving"}
-            className="rounded-lg border border-[#d1d5db] bg-white px-4 py-2 text-sm font-medium text-[#374151] hover:bg-[#f5f0e8] disabled:opacity-60"
+            className="rounded-lg border border-input bg-card px-4 py-2 text-sm font-medium text-foreground hover:bg-muted disabled:opacity-60"
           >
             {saveStatus === "saving" ? "Saving..." : saveStatus === "saved" ? "Saved" : "Save draft"}
           </button>
@@ -304,7 +304,7 @@ export function AttendanceGrid({
             type="button"
             onClick={handleRun}
             disabled={isRunning}
-            className="rounded-lg bg-[#2f4f3e] px-4 py-2 text-sm font-semibold text-white hover:bg-[#274636] disabled:opacity-60"
+            className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
           >
             {isRunning ? "Running payroll..." : "Run payroll"}
           </button>
@@ -316,14 +316,14 @@ export function AttendanceGrid({
       ) : null}
 
       {selectedEntry && selectedPreview ? (
-        <section className="rounded-xl border border-[#ddd6ca] bg-white p-4">
-          <div className="print-exclude mb-4 flex flex-col gap-3 border-b border-[#eee8de] pb-4 lg:flex-row lg:items-end lg:justify-between">
+        <section className="rounded-xl border border-border bg-card p-4">
+          <div className="print-exclude mb-4 flex flex-col gap-3 border-b border-border pb-4 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#5c665f]">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
                 Internal Payslip Preview Generator
               </p>
-              <h2 className="mt-1 text-lg font-semibold text-[#1a2e1f]">Draft payslip preview</h2>
-              <p className="mt-1 text-sm text-[#6b7280]">
+              <h2 className="mt-1 text-lg font-semibold text-foreground">Draft payslip preview</h2>
+              <p className="mt-1 text-sm text-muted-foreground">
                 Preview is based on unsaved draft values below. Save draft before running payroll.
               </p>
             </div>
@@ -331,7 +331,7 @@ export function AttendanceGrid({
               <select
                 value={selectedEntry.employeeId}
                 onChange={(event) => setSelectedEmployeeId(event.target.value)}
-                className="min-w-64 rounded-lg border border-[#d1d5db] bg-white px-3 py-2 text-sm outline-none focus:border-[#2f4f3e] focus:ring-1 focus:ring-[#2f4f3e]"
+                className="min-w-64 rounded-lg border border-input bg-card px-3 py-2 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
               >
                 {entries.map((entry) => (
                   <option key={entry.employeeId} value={entry.employeeId}>
@@ -411,11 +411,11 @@ export function AttendanceGrid({
         {entries.map((entry) => {
           const preview = getPreview(entry);
           return (
-            <article key={entry.employeeId} className="rounded-xl border border-[#ddd6ca] bg-white">
-              <header className="flex flex-col gap-3 border-b border-[#eee8de] bg-[#fbf8f2] px-4 py-3 lg:flex-row lg:items-center lg:justify-between">
+            <article key={entry.employeeId} className="rounded-xl border border-border bg-card">
+              <header className="flex flex-col gap-3 border-b border-border bg-muted px-4 py-3 lg:flex-row lg:items-center lg:justify-between">
                 <div>
-                  <h2 className="text-base font-semibold text-[#1a2e1f]">{entry.employeeName}</h2>
-                  <p className="mt-1 text-xs text-[#6b7280]">
+                  <h2 className="text-base font-semibold text-foreground">{entry.employeeName}</h2>
+                  <p className="mt-1 text-xs text-muted-foreground">
                     {entry.position || "No position"} · {entry.salaryType} · {entry.paymentMethod}
                   </p>
                   {entry.calculationError ? (
@@ -428,7 +428,7 @@ export function AttendanceGrid({
                   <button
                     type="button"
                     onClick={() => setSelectedEmployeeId(entry.employeeId)}
-                    className="rounded-lg border border-[#2f4f3e] px-3 py-2 text-xs font-semibold text-[#2f4f3e] hover:bg-[#edf3ee]"
+                    className="rounded-lg border border-primary px-3 py-2 text-xs font-semibold text-primary hover:bg-accent"
                   >
                     Preview payslip
                   </button>
@@ -437,9 +437,9 @@ export function AttendanceGrid({
 
               <div className="grid gap-4 p-4 xl:grid-cols-3">
                 {FIELD_GROUPS.map((group) => (
-                  <section key={group.title} className="rounded-lg border border-[#ebe5dc] p-3">
-                    <h3 className="text-sm font-semibold text-[#374151]">{group.title}</h3>
-                    <p className="mt-1 text-xs text-[#9ca3af]">{group.description}</p>
+                  <section key={group.title} className="rounded-lg border border-border p-3">
+                    <h3 className="text-sm font-semibold text-foreground">{group.title}</h3>
+                    <p className="mt-1 text-xs text-muted-foreground">{group.description}</p>
                     <div className="mt-3 grid gap-3 sm:grid-cols-2">
                       {group.fields.map((field) => (
                         <NumberInput
@@ -456,14 +456,14 @@ export function AttendanceGrid({
                 ))}
               </div>
 
-              <div className="border-t border-[#eee8de] px-4 py-3">
-                <label className="grid gap-1.5 text-xs font-medium text-[#6b7280]">
+              <div className="border-t border-border px-4 py-3">
+                <label className="grid gap-1.5 text-xs font-medium text-muted-foreground">
                   Notes
                   <textarea
                     value={entry.notes}
                     onChange={(event) => updateEntry(entry.employeeId, "notes", event.target.value)}
                     rows={2}
-                    className="w-full resize-y rounded-lg border border-[#d1d5db] px-3 py-2 text-sm text-[#374151] outline-none focus:border-[#2f4f3e] focus:ring-1 focus:ring-[#2f4f3e]"
+                    className="w-full resize-y rounded-lg border border-input px-3 py-2 text-sm text-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                   />
                 </label>
               </div>
@@ -479,20 +479,20 @@ function SummaryCard({ label, value, highlight }: { label: string; value: string
   return (
     <div
       className={`rounded-xl border px-4 py-3 ${
-        highlight ? "border-[#c3d9c9] bg-[#edf3ee]" : "border-[#ddd6ca] bg-white"
+        highlight ? "border-primary/30 bg-accent" : "border-border bg-card"
       }`}
     >
-      <p className="text-xs text-[#6b7280]">{label}</p>
-      <p className="mt-1 text-lg font-semibold text-[#1a2e1f]">{value}</p>
+      <p className="text-xs text-muted-foreground">{label}</p>
+      <p className="mt-1 text-lg font-semibold text-foreground">{value}</p>
     </div>
   );
 }
 
 function MiniTotal({ label, value, strong }: { label: string; value: string; strong?: boolean }) {
   return (
-    <div className="rounded-lg bg-white px-3 py-2">
-      <p className="text-[10px] uppercase tracking-[0.08em] text-[#9ca3af]">{label}</p>
-      <p className={`mt-1 whitespace-nowrap ${strong ? "font-semibold text-[#1a2e1f]" : "text-[#374151]"}`}>
+    <div className="rounded-lg bg-card px-3 py-2">
+      <p className="text-[10px] uppercase tracking-[0.08em] text-muted-foreground">{label}</p>
+      <p className={`mt-1 whitespace-nowrap ${strong ? "font-semibold text-foreground" : "text-foreground"}`}>
         {value}
       </p>
     </div>
@@ -514,14 +514,14 @@ function NumberInput({
 }) {
   return (
     <label className="grid gap-1.5">
-      <span className="text-xs font-medium text-[#6b7280]">{label}</span>
+      <span className="text-xs font-medium text-muted-foreground">{label}</span>
       <input
         type="number"
         value={value}
         min={min}
         step={step}
         onChange={(event) => onChange(parseFloat(event.target.value) || 0)}
-        className="h-9 w-full rounded-lg border border-[#e5e7eb] px-2 text-right text-sm outline-none focus:border-[#2f4f3e] focus:ring-1 focus:ring-[#2f4f3e]"
+        className="h-9 w-full rounded-lg border border-border px-2 text-right text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
       />
     </label>
   );

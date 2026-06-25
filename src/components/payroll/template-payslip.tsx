@@ -79,7 +79,7 @@ export function TemplatePayslip({
 
   return (
     <div className="payslip-print-area max-w-5xl">
-      <div className="mb-3 text-xs font-medium text-[#6b7280] print:hidden">
+      <div className="mb-3 text-xs font-medium text-muted-foreground print:hidden">
         {kind}
       </div>
       <div className="grid gap-4 xl:grid-cols-2 print:grid-cols-2">
@@ -99,8 +99,8 @@ export function TemplatePayslip({
         />
       </div>
       {showEmployerContributions ? (
-        <div className="mt-4 rounded-lg border border-[#ddd6ca] bg-white px-3 py-3 text-sm print:hidden">
-          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.1em] text-[#5c665f]">
+        <div className="mt-4 rounded-lg border border-border bg-card px-3 py-3 text-sm print:hidden">
+          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.1em] text-muted-foreground">
             Employer contributions
           </p>
           <div className="grid gap-2 sm:grid-cols-3">
@@ -131,17 +131,17 @@ function PayslipCopy({
   const probationaryDeduction = amount(snapshot.probationaryDeduction);
 
   return (
-    <section className="payslip-sheet bg-white p-4 text-[11px] leading-tight text-[#1f2937]">
-      <header className="border-b border-[#9ca3af] pb-2">
+    <section className="payslip-sheet bg-card p-4 text-[11px] leading-tight text-foreground">
+      <header className="border-b border-border pb-2">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <h1 className="text-sm font-bold uppercase tracking-wide text-[#111827]">
+            <h1 className="text-sm font-bold uppercase tracking-wide text-foreground">
               Apnea Dynamics Inc.
             </h1>
-            <p className="mt-0.5 text-[10px] uppercase text-[#4b5563]">Employee payslip</p>
+            <p className="mt-0.5 text-[10px] uppercase text-muted-foreground">Employee payslip</p>
           </div>
-          <div className="text-right text-[10px] text-[#4b5563]">
-            <p className="font-semibold text-[#111827]">{copyLabel}</p>
+          <div className="text-right text-[10px] text-muted-foreground">
+            <p className="font-semibold text-foreground">{copyLabel}</p>
             <p>{periodLabel}</p>
           </div>
         </div>
@@ -193,14 +193,14 @@ function PayslipCopy({
         </TableBlock>
       </div>
 
-      <div className="mt-3 border-y border-[#9ca3af] py-2">
-        <div className="flex items-center justify-between text-sm font-bold uppercase text-[#111827]">
+      <div className="mt-3 border-y border-border py-2">
+        <div className="flex items-center justify-between text-sm font-bold uppercase text-foreground">
           <span>Net Pay</span>
           <span>{toPeso(derived.netPay)}</span>
         </div>
       </div>
 
-      <div className="mt-5 grid grid-cols-3 gap-3 text-center text-[10px] text-[#4b5563]">
+      <div className="mt-5 grid grid-cols-3 gap-3 text-center text-[10px] text-muted-foreground">
         <Signature label="Prepared by" />
         <Signature label="Reviewed by" />
         <Signature label="Employee" />
@@ -275,16 +275,16 @@ function formatQty(value: number): string {
 function Info({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <dt className="text-[9px] uppercase tracking-wide text-[#6b7280]">{label}</dt>
-      <dd className="mt-0.5 font-semibold text-[#111827]">{value}</dd>
+      <dt className="text-[9px] uppercase tracking-wide text-muted-foreground">{label}</dt>
+      <dd className="mt-0.5 font-semibold text-foreground">{value}</dd>
     </div>
   );
 }
 
 function TableBlock({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <div className="border border-[#c7c0b3]">
-      <div className="border-b border-[#c7c0b3] bg-[#f3f0eb] px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-[#111827]">
+    <div className="border border-border">
+      <div className="border-b border-border bg-muted px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-foreground">
         {title}
       </div>
       <div>{children}</div>
@@ -305,12 +305,12 @@ function Line({
 }) {
   return (
     <div
-      className={`grid grid-cols-[1fr_64px_88px] gap-2 border-b border-[#ebe5dc] px-2 py-1 last:border-b-0 ${
-        strong ? "font-bold text-[#111827]" : ""
+      className={`grid grid-cols-[1fr_64px_88px] gap-2 border-b border-border px-2 py-1 last:border-b-0 ${
+        strong ? "font-bold text-foreground" : ""
       }`}
     >
       <span>{label}</span>
-      <span className="text-right text-[#4b5563]">{quantity}</span>
+      <span className="text-right text-muted-foreground">{quantity}</span>
       <span className="text-right tabular-nums">{value}</span>
     </div>
   );
@@ -318,9 +318,9 @@ function Line({
 
 function MiniTotal({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-center justify-between rounded-md border border-[#e4ddd1] px-3 py-2">
-      <span className="text-[#6b7280]">{label}</span>
-      <span className="font-semibold text-[#1a2e1f]">{value}</span>
+    <div className="flex items-center justify-between rounded-md border border-border px-3 py-2">
+      <span className="text-muted-foreground">{label}</span>
+      <span className="font-semibold text-foreground">{value}</span>
     </div>
   );
 }
@@ -328,7 +328,7 @@ function MiniTotal({ label, value }: { label: string; value: string }) {
 function Signature({ label }: { label: string }) {
   return (
     <div>
-      <div className="border-t border-[#6b7280] pt-1">{label}</div>
+      <div className="border-t border-muted-foreground pt-1">{label}</div>
     </div>
   );
 }
