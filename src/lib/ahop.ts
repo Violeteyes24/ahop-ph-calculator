@@ -191,16 +191,22 @@ export function calculatePayroll(input: PayrollInputs): PayrollResult {
   const safeSalaryAdjustments = input.salaryAdjustments || 0;
   const safePreviousYtdAhop = Math.max(0, input.previousYtdAhop || 0);
   const isTemplateMode =
-    (input.taxable ?? false) ||
     (input.expectedWorkHoursPay ?? 0) > 0 ||
+    (input.expectedWorkHours ?? 0) > 0 ||
     (input.scheduledWorkDaysPay ?? 0) > 0 ||
+    (input.scheduledWorkDays ?? 0) > 0 ||
     (input.workedHours ?? 0) > 0 ||
     safeAotMinutes > 0 ||
+    (input.aotPay ?? 0) > 0 ||
+    (input.extraOtPremium ?? 0) !== 0 ||
     safeRegularHolidayHours > 0 ||
+    (input.regularHolidayPay ?? 0) > 0 ||
     safeSpecialHolidayHours > 0 ||
-    (input.coAhop ?? 0) > 0 ||
-    (input.totalAhop ?? 0) > 0 ||
-    safeWithholdingTax > 0;
+    (input.specialHolidayPay ?? 0) > 0 ||
+    (input.coAhop ?? 0) !== 0 ||
+    (input.totalAhop ?? 0) !== 0 ||
+    safeWithholdingTax > 0 ||
+    safeLoanDeductions > 0;
   const philHealthRate =
     Math.max(0, input.contributionRates?.philHealthRatePct ?? PHILHEALTH_RATE * 100) / 100;
   const pagIbigEmployeeFixed = Math.max(
@@ -222,6 +228,8 @@ export function calculatePayroll(input: PayrollInputs): PayrollResult {
       ? round2(safeScheduledWorkDays * safeDailyRate)
       : safeScheduledWorkDaysPay > 0
       ? safeScheduledWorkDaysPay
+      : isTaxableAhopTemplate
+      ? 0
       : safeExpectedWorkHoursPay;
 
   const regularPay = isTemplateMode

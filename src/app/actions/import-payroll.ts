@@ -14,6 +14,7 @@ import {
   type SerializedExcelPayrollData,
 } from "@/lib/excel-importer";
 import { getContributionRatesForPeriod } from "@/lib/contribution-rates";
+import { DEFAULT_MONTHLY_AHOP_BASELINE_DAYS } from "@/lib/payroll-draft";
 import { generateReconciliationReport, reconcilePayroll } from "@/lib/payroll-reconciliation";
 import { prisma } from "@/lib/prisma";
 
@@ -33,11 +34,6 @@ function getDefaultLabel(periodStart: Date, periodEnd: Date): string {
     year: "numeric",
   }).format(periodEnd);
   return `${start}-${end}`;
-}
-
-function getBaselineDays(employees: ExcelEmployeeRow[]): number {
-  const maxScheduledDays = Math.max(...employees.map((employee) => Math.floor(employee.scheduledWorkDays || 0)));
-  return maxScheduledDays > 0 ? maxScheduledDays : 23;
 }
 
 function getWarnings(employees: ExcelEmployeeRow[]): string[] {
@@ -94,7 +90,7 @@ export async function importPayrollWorkbookAction(
         employee.name,
         calculatePayroll({
           ...excelEmployeeToPayrollInput(employee),
-          baselineDays: getBaselineDays(data.employees),
+          baselineDays: DEFAULT_MONTHLY_AHOP_BASELINE_DAYS,
           contributionRates,
         })
       );
@@ -153,7 +149,7 @@ export async function confirmPayrollImportAction(batchId: string, formData: Form
 
   const data = deserializeExcelPayrollData(batch.parsedRows as unknown as SerializedExcelPayrollData);
   const periodLabel = label || getDefaultLabel(data.periodStart, data.periodEnd);
-  const baselineDays = getBaselineDays(data.employees);
+  const baselineDays = DEFAULT_MONTHLY_AHOP_BASELINE_DAYS;
 
   const period = await prisma.$transaction(async (tx) => {
     const existingDraft = await tx.payrollPeriod.findFirst({
