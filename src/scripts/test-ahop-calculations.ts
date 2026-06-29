@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { calculatePayroll } from "@/lib/ahop";
+import { withDerivedDailyAhopDraftValues } from "@/lib/payroll-draft";
 
 function assertEqual(actual: number, expected: number, label: string): void {
   if (actual !== expected) {
@@ -51,29 +52,71 @@ assertEqual(templateResult.withholdingTax, 100, "template withholding is retaine
 assertEqual(templateResult.loanDeductions, 200, "template loans are retained");
 assertEqual(templateResult.netPay, 10_088.75, "template net includes withholding and loans");
 
+const zacharyMinimalDraft = withDerivedDailyAhopDraftValues(
+  {
+    salaryType: "DAILY" as const,
+    salaryCategory: "AHOP",
+    dailyRate: 950,
+    workingDays: 0,
+    workedHours: 88,
+    expectedWorkHours: 0,
+    expectedWorkHoursPay: 0,
+    scheduledWorkDays: 11,
+    scheduledWorkDaysPay: 0,
+    absenceHours: 16,
+    absenceDeduction: 0,
+    tardinessMinutes: 5,
+    tardinessDeduction: 0,
+    aotMinutes: 0,
+    aotPay: 0,
+    extraOtPremium: 0,
+    regularHolidayHours: 8,
+    regularHolidayPay: 0,
+    specialHolidayHours: 0,
+    specialHolidayPay: 0,
+    totalHolidayPay: 0,
+    coAhop: 0,
+    totalAhop: 0,
+  },
+  23
+);
+
+assertEqual(zacharyMinimalDraft.workingDays, 11, "Zachary draft derives worked days from scheduled days");
+assertEqual(zacharyMinimalDraft.expectedWorkHours, 92, "Zachary draft derives AHOP target hours");
+assertEqual(zacharyMinimalDraft.expectedWorkHoursPay, 10_925, "Zachary draft derives AHOP target pay");
+assertEqual(zacharyMinimalDraft.scheduledWorkDaysPay, 10_450, "Zachary draft derives scheduled pay");
+assertEqual(zacharyMinimalDraft.absenceDeduction, -1_900, "Zachary draft derives absence deduction");
+assertEqual(zacharyMinimalDraft.tardinessDeduction, 9.9, "Zachary draft derives tardiness deduction");
+assertEqual(zacharyMinimalDraft.regularHolidayPay, 950, "Zachary draft derives regular holiday pay");
+assertEqual(zacharyMinimalDraft.coAhop, -475, "Zachary draft derives CO AHOP extra");
+assertEqual(zacharyMinimalDraft.totalAhop, 475, "Zachary draft derives total AHOP");
+
 const zacharyPayslipResult = calculatePayroll({
   salaryType: "DAILY",
   dailyRate: 950,
   monthlyRate: 20_900,
-  workingDays: 11,
-  workedHours: 88,
+  workingDays: zacharyMinimalDraft.workingDays,
+  workedHours: zacharyMinimalDraft.workedHours,
   baselineDays: 23,
   taxable: true,
   deMinimisPay: 1_691.5,
-  expectedWorkHoursPay: 10_925,
-  scheduledWorkDays: 11,
-  scheduledWorkDaysPay: 10_450,
-  absenceHours: 16,
-  absenceDeduction: -1_900,
-  tardinessMinutes: 5,
-  tardinessDeduction: 9.8958333333,
-  regularHolidayHours: 8,
-  regularHolidayPay: 950,
-  specialHolidayHours: 0,
-  specialHolidayPay: 0,
-  aotMinutes: 0,
-  aotPay: 0,
-  extraOtPremium: 0,
+  expectedWorkHours: zacharyMinimalDraft.expectedWorkHours,
+  expectedWorkHoursPay: zacharyMinimalDraft.expectedWorkHoursPay,
+  scheduledWorkDays: zacharyMinimalDraft.scheduledWorkDays,
+  scheduledWorkDaysPay: zacharyMinimalDraft.scheduledWorkDaysPay,
+  absenceHours: zacharyMinimalDraft.absenceHours,
+  absenceDeduction: zacharyMinimalDraft.absenceDeduction,
+  tardinessMinutes: zacharyMinimalDraft.tardinessMinutes,
+  tardinessDeduction: zacharyMinimalDraft.tardinessDeduction,
+  regularHolidayHours: zacharyMinimalDraft.regularHolidayHours,
+  regularHolidayPay: zacharyMinimalDraft.regularHolidayPay,
+  specialHolidayHours: zacharyMinimalDraft.specialHolidayHours,
+  specialHolidayPay: zacharyMinimalDraft.specialHolidayPay,
+  aotMinutes: zacharyMinimalDraft.aotMinutes,
+  aotPay: zacharyMinimalDraft.aotPay,
+  extraOtPremium: zacharyMinimalDraft.extraOtPremium,
+  coAhop: zacharyMinimalDraft.coAhop,
+  totalAhop: zacharyMinimalDraft.totalAhop,
   withholdingTax: 0,
   loanDeductions: 0,
   salaryAdjustments: 0,

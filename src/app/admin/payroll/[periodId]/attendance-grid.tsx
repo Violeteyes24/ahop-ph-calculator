@@ -5,6 +5,7 @@ import { saveAttendanceAction, runPayrollAction } from "@/app/actions/payroll";
 import { PrintButton } from "@/components/payroll/print-button";
 import { TemplatePayslip } from "@/components/payroll/template-payslip";
 import { calculatePayroll, type ContributionRateInputs, type PayrollResult } from "@/lib/ahop";
+import { withDerivedDailyAhopDraftValues } from "@/lib/payroll-draft";
 
 interface EntryRow {
   id: string;
@@ -86,19 +87,20 @@ interface FieldDef {
   label: string;
   step?: number;
   min?: number;
+  derived?: boolean;
 }
 
 const FIELD_GROUPS: Array<{ title: string; description: string; fields: FieldDef[] }> = [
   {
     title: "Work Basis",
-    description: "Hours, scheduled days, and base-period source values.",
+    description: "Attendance facts and the derived semi-month AHOP target.",
     fields: [
-      { key: "workingDays", label: "Worked days", step: 1 },
+      { key: "workingDays", label: "Payslip work days", step: 1, derived: true },
       { key: "workedHours", label: "Worked hours" },
-      { key: "expectedWorkHours", label: "Expected hours" },
-      { key: "expectedWorkHoursPay", label: "Expected pay", step: 0.01 },
+      { key: "expectedWorkHours", label: "AHOP target hours", derived: true },
+      { key: "expectedWorkHoursPay", label: "AHOP target pay", step: 0.01, derived: true },
       { key: "scheduledWorkDays", label: "Scheduled days" },
-      { key: "scheduledWorkDaysPay", label: "Scheduled pay", step: 0.01 },
+      { key: "scheduledWorkDaysPay", label: "Scheduled pay", step: 0.01, derived: true },
     ],
   },
   {
@@ -110,9 +112,9 @@ const FIELD_GROUPS: Array<{ title: string; description: string; fields: FieldDef
       { key: "silDays", label: "SIL days" },
       { key: "slHours", label: "SL hours" },
       { key: "absenceHours", label: "Absence hours" },
-      { key: "absenceDeduction", label: "Absence amount", step: 0.01, min: -999999 },
+      { key: "absenceDeduction", label: "Absence amount", step: 0.01, min: -999999, derived: true },
       { key: "tardinessMinutes", label: "Tardy minutes" },
-      { key: "tardinessDeduction", label: "Tardy amount", step: 0.01 },
+      { key: "tardinessDeduction", label: "Tardy amount", step: 0.01, derived: true },
     ],
   },
   {
@@ -123,11 +125,11 @@ const FIELD_GROUPS: Array<{ title: string; description: string; fields: FieldDef
       { key: "aotPay", label: "AOT pay", step: 0.01 },
       { key: "extraOtPremium", label: "OT premium", step: 0.01 },
       { key: "regularHolidayHours", label: "Regular holiday hours" },
-      { key: "regularHolidayPay", label: "Regular holiday pay", step: 0.01 },
+      { key: "regularHolidayPay", label: "Regular holiday pay", step: 0.01, derived: true },
       { key: "specialHolidayHours", label: "Special holiday hours" },
-      { key: "specialHolidayPay", label: "Special holiday pay", step: 0.01 },
-      { key: "coAhop", label: "CO AHOP", step: 0.01 },
-      { key: "withholdingTax", label: "W/H tax", step: 0.01 },
+      { key: "specialHolidayPay", label: "Special holiday pay", step: 0.01, derived: true },
+      { key: "coAhop", label: "CO AHOP / Extra", step: 0.01, derived: true },
+      { key: "withholdingTax", label: "Withholding tax", step: 0.01 },
       { key: "loanDeductions", label: "Loans", step: 0.01 },
       { key: "salaryAdjustments", label: "Adjustments", step: 0.01, min: -999999 },
     ],
@@ -159,7 +161,11 @@ export function AttendanceGrid({
   contributionRates: ContributionRateInputs;
   entries: EntryRow[];
 }) {
-  const [entries, setEntries] = useState<EntryRow[]>(initialEntries);
+  function deriveEntry(entry: EntryRow): EntryRow {
+    return withDerivedDailyAhopDraftValues(entry, baselineDays);
+  }
+
+  const [entries, setEntries] = useState<EntryRow[]>(() => initialEntries.map(deriveEntry));
   const [selectedEmployeeId, setSelectedEmployeeId] = useState(initialEntries[0]?.employeeId ?? "");
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [runError, setRunError] = useState<string | null>(null);
@@ -167,46 +173,51 @@ export function AttendanceGrid({
 
   function updateEntry(employeeId: string, field: NumberField | "notes", value: number | string) {
     setEntries((prev) =>
-      prev.map((entry) => (entry.employeeId === employeeId ? { ...entry, [field]: value } : entry))
+      prev.map((entry) => {
+        if (entry.employeeId !== employeeId) return entry;
+        const updatedEntry = { ...entry, [field]: value };
+        return field === "notes" ? updatedEntry : deriveEntry(updatedEntry);
+      })
     );
     setSaveStatus("idle");
   }
 
   function getPreview(entry: EntryRow): PayrollResult {
+    const draft = deriveEntry(entry);
     return calculatePayroll({
-      salaryType: entry.salaryType,
-      dailyRate: entry.dailyRate,
-      monthlyRate: entry.monthlyRate,
-      workingDays: entry.workingDays,
-      workedHours: entry.workedHours,
+      salaryType: draft.salaryType,
+      dailyRate: draft.dailyRate,
+      monthlyRate: draft.monthlyRate,
+      workingDays: draft.workingDays,
+      workedHours: draft.workedHours,
       baselineDays,
-      taxable: entry.taxable,
-      deMinimisPay: entry.deminimisAmount / 2,
-      expectedWorkHours: entry.expectedWorkHours,
-      expectedWorkHoursPay: entry.expectedWorkHoursPay,
-      scheduledWorkDays: entry.scheduledWorkDays,
-      scheduledWorkDaysPay: entry.scheduledWorkDaysPay,
-      overtimeRegularHours: entry.overtimeRegularHours,
-      overtimeExtendedHours: entry.overtimeExtendedHours,
-      silDays: entry.silDays,
-      slHours: entry.slHours,
-      absenceHours: entry.absenceHours,
-      absenceDeduction: entry.absenceDeduction,
-      tardinessMinutes: entry.tardinessMinutes,
-      tardinessDeduction: entry.tardinessDeduction,
-      aotMinutes: entry.aotMinutes,
-      aotPay: entry.aotPay,
-      extraOtPremium: entry.extraOtPremium,
-      regularHolidayHours: entry.regularHolidayHours,
-      regularHolidayPay: entry.regularHolidayPay,
-      specialHolidayHours: entry.specialHolidayHours,
-      specialHolidayPay: entry.specialHolidayPay,
-      totalHolidayPay: entry.totalHolidayPay,
-      coAhop: entry.coAhop,
-      totalAhop: entry.totalAhop,
-      withholdingTax: entry.withholdingTax,
-      loanDeductions: entry.loanDeductions,
-      salaryAdjustments: entry.salaryAdjustments,
+      taxable: draft.taxable,
+      deMinimisPay: draft.deminimisAmount / 2,
+      expectedWorkHours: draft.expectedWorkHours,
+      expectedWorkHoursPay: draft.expectedWorkHoursPay,
+      scheduledWorkDays: draft.scheduledWorkDays,
+      scheduledWorkDaysPay: draft.scheduledWorkDaysPay,
+      overtimeRegularHours: draft.overtimeRegularHours,
+      overtimeExtendedHours: draft.overtimeExtendedHours,
+      silDays: draft.silDays,
+      slHours: draft.slHours,
+      absenceHours: draft.absenceHours,
+      absenceDeduction: draft.absenceDeduction,
+      tardinessMinutes: draft.tardinessMinutes,
+      tardinessDeduction: draft.tardinessDeduction,
+      aotMinutes: draft.aotMinutes,
+      aotPay: draft.aotPay,
+      extraOtPremium: draft.extraOtPremium,
+      regularHolidayHours: draft.regularHolidayHours,
+      regularHolidayPay: draft.regularHolidayPay,
+      specialHolidayHours: draft.specialHolidayHours,
+      specialHolidayPay: draft.specialHolidayPay,
+      totalHolidayPay: draft.totalHolidayPay,
+      coAhop: draft.coAhop,
+      totalAhop: draft.totalAhop,
+      withholdingTax: draft.withholdingTax,
+      loanDeductions: draft.loanDeductions,
+      salaryAdjustments: draft.salaryAdjustments,
       contributionRates,
     });
   }
@@ -218,38 +229,41 @@ export function AttendanceGrid({
     setSaveStatus("saving");
     const result = await saveAttendanceAction(
       periodId,
-      entries.map((entry) => ({
-        employeeId: entry.employeeId,
-        workingDays: entry.workingDays,
-        workedHours: entry.workedHours,
-        expectedWorkHours: entry.expectedWorkHours,
-        expectedWorkHoursPay: entry.expectedWorkHoursPay,
-        scheduledWorkDays: entry.scheduledWorkDays,
-        scheduledWorkDaysPay: entry.scheduledWorkDaysPay,
-        overtimeRegularHours: entry.overtimeRegularHours,
-        overtimeExtendedHours: entry.overtimeExtendedHours,
-        silDays: entry.silDays,
-        slHours: entry.slHours,
-        absenceHours: entry.absenceHours,
-        absenceDeduction: entry.absenceDeduction,
-        tardinessMinutes: entry.tardinessMinutes,
-        tardinessDeduction: entry.tardinessDeduction,
-        aotMinutes: entry.aotMinutes,
-        aotPay: entry.aotPay,
-        extraOtPremium: entry.extraOtPremium,
-        regularHolidayHours: entry.regularHolidayHours,
-        regularHolidayPay: entry.regularHolidayPay,
-        specialHolidayHours: entry.specialHolidayHours,
-        specialHolidayPay: entry.specialHolidayPay,
-        totalHolidayPay: entry.totalHolidayPay,
-        coAhop: entry.coAhop,
-        totalAhop: entry.totalAhop,
-        withholdingTax: entry.withholdingTax,
-        sourceGrossIncome: entry.sourceGrossIncome,
-        loanDeductions: entry.loanDeductions,
-        salaryAdjustments: entry.salaryAdjustments,
-        notes: entry.notes,
-      }))
+      entries.map((entry) => {
+        const draft = deriveEntry(entry);
+        return {
+          employeeId: entry.employeeId,
+          workingDays: draft.workingDays,
+          workedHours: draft.workedHours,
+          expectedWorkHours: draft.expectedWorkHours,
+          expectedWorkHoursPay: draft.expectedWorkHoursPay,
+          scheduledWorkDays: draft.scheduledWorkDays,
+          scheduledWorkDaysPay: draft.scheduledWorkDaysPay,
+          overtimeRegularHours: entry.overtimeRegularHours,
+          overtimeExtendedHours: entry.overtimeExtendedHours,
+          silDays: entry.silDays,
+          slHours: entry.slHours,
+          absenceHours: entry.absenceHours,
+          absenceDeduction: draft.absenceDeduction,
+          tardinessMinutes: entry.tardinessMinutes,
+          tardinessDeduction: draft.tardinessDeduction,
+          aotMinutes: entry.aotMinutes,
+          aotPay: draft.aotPay,
+          extraOtPremium: entry.extraOtPremium,
+          regularHolidayHours: entry.regularHolidayHours,
+          regularHolidayPay: draft.regularHolidayPay,
+          specialHolidayHours: entry.specialHolidayHours,
+          specialHolidayPay: draft.specialHolidayPay,
+          totalHolidayPay: draft.totalHolidayPay,
+          coAhop: draft.coAhop,
+          totalAhop: draft.totalAhop,
+          withholdingTax: entry.withholdingTax,
+          sourceGrossIncome: entry.sourceGrossIncome,
+          loanDeductions: entry.loanDeductions,
+          salaryAdjustments: entry.salaryAdjustments,
+          notes: entry.notes,
+        };
+      })
     );
     setSaveStatus(result.success ? "saved" : "error");
   }
@@ -452,6 +466,7 @@ export function AttendanceGrid({
                           onChange={(value) => updateEntry(entry.employeeId, field.key, value)}
                           step={field.step}
                           min={field.min}
+                          readOnly={field.derived}
                         />
                       ))}
                     </div>
@@ -508,12 +523,14 @@ function NumberInput({
   onChange,
   step = 0.5,
   min = 0,
+  readOnly = false,
 }: {
   label: string;
   value: number;
   onChange: (value: number) => void;
   step?: number;
   min?: number;
+  readOnly?: boolean;
 }) {
   return (
     <label className="grid gap-1.5">
@@ -523,8 +540,11 @@ function NumberInput({
         value={value}
         min={min}
         step={step}
+        readOnly={readOnly}
         onChange={(event) => onChange(parseFloat(event.target.value) || 0)}
-        className="h-9 w-full rounded-lg border border-border px-2 text-right text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+        className={`h-9 w-full rounded-lg border border-border px-2 text-right text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary ${
+          readOnly ? "bg-muted text-muted-foreground" : ""
+        }`}
       />
     </label>
   );

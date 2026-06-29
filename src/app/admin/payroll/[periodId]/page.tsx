@@ -121,7 +121,7 @@ export default async function AttendancePeriodPage({
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
             {toDateLabel(period.periodStart)} – {toDateLabel(period.periodEnd)} ·{" "}
-            {period.baselineDays} baseline days · {entries.length} employees
+            Monthly AHOP baseline: {period.baselineDays} days · {entries.length} employees
           </p>
         </div>
         <span className="rounded-full bg-yellow-50 px-3 py-1 text-xs font-medium text-yellow-700">

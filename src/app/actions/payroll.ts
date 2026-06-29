@@ -7,12 +7,12 @@ import { requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { calculatePayroll } from "@/lib/ahop";
 import { getContributionRatesForPeriod } from "@/lib/contribution-rates";
+import { DEFAULT_MONTHLY_AHOP_BASELINE_DAYS, withDerivedDailyAhopDraftValues } from "@/lib/payroll-draft";
 
 const createPeriodSchema = z.object({
   label: z.string().min(1, "Label is required"),
   periodStart: z.string().min(1, "Period start is required"),
   periodEnd: z.string().min(1, "Period end is required"),
-  baselineDays: z.string().default("23"),
 });
 
 export interface PayrollActionState {
@@ -49,12 +49,11 @@ export async function createPeriodAction(
       label: data.label,
       periodStart,
       periodEnd,
-      baselineDays: parseInt(data.baselineDays),
+      baselineDays: DEFAULT_MONTHLY_AHOP_BASELINE_DAYS,
       createdBy: session.userId,
       attendanceEntries: {
         create: activeEmployees.map((emp) => ({
           employeeId: emp.id,
-          workingDays: parseInt(data.baselineDays),
         })),
       },
     },
@@ -105,9 +104,25 @@ export async function saveAttendanceAction(
   if (!period) return { success: false, error: "Period not found" };
   if (period.status !== "DRAFT") return { success: false, error: "Period is no longer editable" };
 
+  const employees = await prisma.employeeProfile.findMany({
+    where: { id: { in: entries.map((entry) => entry.employeeId) } },
+  });
+  const employeesById = new Map(employees.map((employee) => [employee.id, employee]));
+
   await Promise.all(
-    entries.map((entry) =>
-      prisma.attendanceEntry.upsert({
+    entries.map((entry) => {
+      const employee = employeesById.get(entry.employeeId);
+      const draft = withDerivedDailyAhopDraftValues(
+        {
+          ...entry,
+          salaryType: employee?.salaryType === "DAILY" ? ("DAILY" as const) : ("MONTHLY" as const),
+          salaryCategory: employee?.salaryCategory ?? null,
+          dailyRate: Number(employee?.dailyRate ?? 0),
+        },
+        period.baselineDays
+      );
+
+      return prisma.attendanceEntry.upsert({
         where: {
           periodId_employeeId: {
             periodId,
@@ -115,30 +130,30 @@ export async function saveAttendanceAction(
           },
         },
         update: {
-          workingDays: entry.workingDays,
+          workingDays: draft.workingDays,
           workedHours: entry.workedHours,
-          expectedWorkHours: entry.expectedWorkHours,
-          expectedWorkHoursPay: entry.expectedWorkHoursPay,
-          scheduledWorkDays: entry.scheduledWorkDays,
-          scheduledWorkDaysPay: entry.scheduledWorkDaysPay,
+          expectedWorkHours: draft.expectedWorkHours,
+          expectedWorkHoursPay: draft.expectedWorkHoursPay,
+          scheduledWorkDays: draft.scheduledWorkDays,
+          scheduledWorkDaysPay: draft.scheduledWorkDaysPay,
           overtimeRegularHours: entry.overtimeRegularHours,
           overtimeExtendedHours: entry.overtimeExtendedHours,
           silDays: entry.silDays,
           slHours: entry.slHours,
           absenceHours: entry.absenceHours,
-          absenceDeduction: entry.absenceDeduction,
+          absenceDeduction: draft.absenceDeduction,
           tardinessMinutes: entry.tardinessMinutes,
-          tardinessDeduction: entry.tardinessDeduction,
+          tardinessDeduction: draft.tardinessDeduction,
           aotMinutes: entry.aotMinutes,
-          aotPay: entry.aotPay,
+          aotPay: draft.aotPay,
           extraOtPremium: entry.extraOtPremium,
           regularHolidayHours: entry.regularHolidayHours,
-          regularHolidayPay: entry.regularHolidayPay,
+          regularHolidayPay: draft.regularHolidayPay,
           specialHolidayHours: entry.specialHolidayHours,
-          specialHolidayPay: entry.specialHolidayPay,
-          totalHolidayPay: entry.totalHolidayPay,
-          coAhop: entry.coAhop,
-          totalAhop: entry.totalAhop,
+          specialHolidayPay: draft.specialHolidayPay,
+          totalHolidayPay: draft.totalHolidayPay,
+          coAhop: draft.coAhop,
+          totalAhop: draft.totalAhop,
           withholdingTax: entry.withholdingTax,
           sourceGrossIncome: entry.sourceGrossIncome,
           loanDeductions: entry.loanDeductions,
@@ -148,38 +163,38 @@ export async function saveAttendanceAction(
         create: {
           periodId,
           employeeId: entry.employeeId,
-          workingDays: entry.workingDays,
+          workingDays: draft.workingDays,
           workedHours: entry.workedHours,
-          expectedWorkHours: entry.expectedWorkHours,
-          expectedWorkHoursPay: entry.expectedWorkHoursPay,
-          scheduledWorkDays: entry.scheduledWorkDays,
-          scheduledWorkDaysPay: entry.scheduledWorkDaysPay,
+          expectedWorkHours: draft.expectedWorkHours,
+          expectedWorkHoursPay: draft.expectedWorkHoursPay,
+          scheduledWorkDays: draft.scheduledWorkDays,
+          scheduledWorkDaysPay: draft.scheduledWorkDaysPay,
           overtimeRegularHours: entry.overtimeRegularHours,
           overtimeExtendedHours: entry.overtimeExtendedHours,
           silDays: entry.silDays,
           slHours: entry.slHours,
           absenceHours: entry.absenceHours,
-          absenceDeduction: entry.absenceDeduction,
+          absenceDeduction: draft.absenceDeduction,
           tardinessMinutes: entry.tardinessMinutes,
-          tardinessDeduction: entry.tardinessDeduction,
+          tardinessDeduction: draft.tardinessDeduction,
           aotMinutes: entry.aotMinutes,
-          aotPay: entry.aotPay,
+          aotPay: draft.aotPay,
           extraOtPremium: entry.extraOtPremium,
           regularHolidayHours: entry.regularHolidayHours,
-          regularHolidayPay: entry.regularHolidayPay,
+          regularHolidayPay: draft.regularHolidayPay,
           specialHolidayHours: entry.specialHolidayHours,
-          specialHolidayPay: entry.specialHolidayPay,
-          totalHolidayPay: entry.totalHolidayPay,
-          coAhop: entry.coAhop,
-          totalAhop: entry.totalAhop,
+          specialHolidayPay: draft.specialHolidayPay,
+          totalHolidayPay: draft.totalHolidayPay,
+          coAhop: draft.coAhop,
+          totalAhop: draft.totalAhop,
           withholdingTax: entry.withholdingTax,
           sourceGrossIncome: entry.sourceGrossIncome,
           loanDeductions: entry.loanDeductions,
           salaryAdjustments: entry.salaryAdjustments,
           notes: entry.notes,
         },
-      })
-    )
+      });
+    })
   );
 
   revalidatePath(`/admin/payroll/${periodId}`);
@@ -221,36 +236,44 @@ export async function runPayrollAction(periodId: string): Promise<{ success: boo
       const previousYtdAhop = prevSnapshot ? Number(prevSnapshot.ytdAhop) : 0;
 
       const input = {
+        ...withDerivedDailyAhopDraftValues(
+          {
+            salaryType: emp.salaryType === "DAILY" ? ("DAILY" as const) : ("MONTHLY" as const),
+            salaryCategory: emp.salaryCategory,
+            dailyRate: Number(emp.dailyRate ?? 0),
+            workingDays: entry.workingDays,
+            workedHours: Number(entry.workedHours),
+            expectedWorkHours: Number(entry.expectedWorkHours),
+            expectedWorkHoursPay: Number(entry.expectedWorkHoursPay),
+            scheduledWorkDays: Number(entry.scheduledWorkDays),
+            scheduledWorkDaysPay: Number(entry.scheduledWorkDaysPay),
+            absenceHours: Number(entry.absenceHours),
+            absenceDeduction: Number(entry.absenceDeduction),
+            tardinessMinutes: Number(entry.tardinessMinutes),
+            tardinessDeduction: Number(entry.tardinessDeduction),
+            aotMinutes: Number(entry.aotMinutes),
+            aotPay: Number(entry.aotPay),
+            extraOtPremium: Number(entry.extraOtPremium),
+            regularHolidayHours: Number(entry.regularHolidayHours),
+            regularHolidayPay: Number(entry.regularHolidayPay),
+            specialHolidayHours: Number(entry.specialHolidayHours),
+            specialHolidayPay: Number(entry.specialHolidayPay),
+            totalHolidayPay: Number(entry.totalHolidayPay),
+            coAhop: Number(entry.coAhop),
+            totalAhop: Number(entry.totalAhop),
+          },
+          period.baselineDays
+        ),
         salaryType: emp.salaryType === "DAILY" ? ("DAILY" as const) : ("MONTHLY" as const),
         dailyRate: Number(emp.dailyRate ?? 0),
         monthlyRate: Number(emp.monthlyRate ?? 0),
-        workingDays: entry.workingDays,
-        workedHours: Number(entry.workedHours),
         baselineDays: period.baselineDays,
         taxable: emp.taxable,
         deMinimisPay: Number(emp.deminimisAmount) / 2,
-        expectedWorkHours: Number(entry.expectedWorkHours),
-        expectedWorkHoursPay: Number(entry.expectedWorkHoursPay),
-        scheduledWorkDays: Number(entry.scheduledWorkDays),
-        scheduledWorkDaysPay: Number(entry.scheduledWorkDaysPay),
         overtimeRegularHours: Number(entry.overtimeRegularHours),
         overtimeExtendedHours: Number(entry.overtimeExtendedHours),
         silDays: Number(entry.silDays),
         slHours: Number(entry.slHours),
-        absenceHours: Number(entry.absenceHours),
-        absenceDeduction: Number(entry.absenceDeduction),
-        tardinessMinutes: Number(entry.tardinessMinutes),
-        tardinessDeduction: Number(entry.tardinessDeduction),
-        aotMinutes: Number(entry.aotMinutes),
-        aotPay: Number(entry.aotPay),
-        extraOtPremium: Number(entry.extraOtPremium),
-        regularHolidayHours: Number(entry.regularHolidayHours),
-        regularHolidayPay: Number(entry.regularHolidayPay),
-        specialHolidayHours: Number(entry.specialHolidayHours),
-        specialHolidayPay: Number(entry.specialHolidayPay),
-        totalHolidayPay: Number(entry.totalHolidayPay),
-        coAhop: Number(entry.coAhop),
-        totalAhop: Number(entry.totalAhop),
         withholdingTax: Number(entry.withholdingTax),
         loanDeductions: Number(entry.loanDeductions),
         salaryAdjustments: Number(entry.salaryAdjustments),
@@ -265,8 +288,8 @@ export async function runPayrollAction(periodId: string): Promise<{ success: boo
         periodId,
         periodStart: period.periodStart,
         periodEnd: period.periodEnd,
-        workingDays: entry.workingDays,
-        workedHours: Number(entry.workedHours),
+        workingDays: input.workingDays,
+        workedHours: input.workedHours,
         baselineDays: period.baselineDays,
         regularPay: result.regularPay,
         ahopTopup: result.ahopTopup,
@@ -291,7 +314,7 @@ export async function runPayrollAction(periodId: string): Promise<{ success: boo
         slPay: result.slPay,
         totalLeaves: result.totalLeaves,
         totalLeavesPay: result.totalLeavesPay,
-        absenceHours: Number(entry.absenceHours),
+        absenceHours: input.absenceHours,
         absencePay: result.absencePay,
         absenceDeduction: result.absenceDeduction,
         tardinessMinutes: result.tardinessMinutes,

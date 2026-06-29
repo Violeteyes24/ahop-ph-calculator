@@ -1,4 +1,5 @@
 import * as XLSX from "xlsx";
+import { DEFAULT_MONTHLY_AHOP_BASELINE_DAYS } from "@/lib/payroll-draft";
 // import { Decimal } from "@prisma/client/runtime/library";
 
 export interface ExcelEmployeeRow {
@@ -307,7 +308,7 @@ export function excelEmployeeToPayrollInput(employee: ExcelEmployeeRow) {
     monthlyRate: employee.monthlyRate,
     workingDays: Math.floor(employee.workedDays),
     workedHours: employee.workedHours,
-    baselineDays: 23, // Default baseline
+    baselineDays: DEFAULT_MONTHLY_AHOP_BASELINE_DAYS,
     taxable: employee.taxable.toLowerCase() === "yes",
     deMinimisPay: employee.deMinimisBiMonthly,
     expectedWorkHours: employee.expectedWorkHours,

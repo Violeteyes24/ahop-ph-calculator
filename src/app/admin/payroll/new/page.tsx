@@ -78,24 +78,9 @@ export default function NewPayrollPeriodPage() {
             <p className="text-xs text-muted-foreground">A short name for this pay period.</p>
           </div>
 
-          <div className="flex flex-col gap-1.5">
-            <label htmlFor="baselineDays" className="text-sm font-medium text-foreground">
-              Baseline days
-            </label>
-            <input
-              id="baselineDays"
-              name="baselineDays"
-              type="number"
-              min="1"
-              max="31"
-              defaultValue="23"
-              required
-              className="rounded-lg border border-input px-3 py-2 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
-            />
-            <p className="text-xs text-muted-foreground">
-              The standard number of working days for AHOP calculation (typically 23).
-            </p>
-          </div>
+          <p className="rounded-lg border border-border bg-muted px-3 py-2 text-xs text-muted-foreground">
+            AHOP target pay uses the monthly AHOP baseline policy, currently 23 days per month.
+          </p>
         </div>
 
         {state.error ? (
