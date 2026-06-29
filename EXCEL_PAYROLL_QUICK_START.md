@@ -113,15 +113,14 @@ Gross = Regular Pay + AHOP + RD OT + Extended OT + SIL + SL - Absences
 ### Deductions (from Gross)
 1. SSS - Based on contribution brackets (₱575-₱700 for employees)
 2. Philhealth - 2.5% of gross
-3. Pag-ibig - Fixed ₱200
-4. Probationary Deduction - If applicable
-5. Tardiness/Undertime - Custom deduction
-6. Loans - Active loan payments
-7. Salary Adjustments - One-time adjustments (can be positive or negative)
+3. Pag-ibig - Configurable semi-month amount, default ₱100
+4. Tardiness/Undertime - Custom deduction
+5. Loans - Active loan payments
+6. Salary Adjustments - One-time adjustments (can be positive or negative)
 
 ### Net Pay
 ```
-Net = Gross - (SSS + Philhealth + Pag-ibig + Probationary + Tardiness + Loans)
+Net = Gross - (SSS + Philhealth + Pag-ibig + Tardiness + Loans)
     + Salary Adjustments (if positive)
 ```
 
@@ -149,9 +148,9 @@ YTD AHOP = Previous Period YTD + Current Period AHOP
 4. Gross = 10,000 + 1,500 + 125 = ₱11,625
 5. SSS = ₱625 (from ₱11,625 bracket)
 6. Philhealth = 11,625 × 0.025 = ₱290.63
-7. Pag-ibig = ₱200
-8. Total Deductions = 625 + 290.63 + 200 = ₱1,115.63
-9. Net = 11,625 - 1,115.63 = ₱10,509.37
+7. Pag-ibig = ₱100 when the default semi-month config is used
+8. Total Deductions = 625 + 290.63 + 100 = ₱1,015.63
+9. Net = 11,625 - 1,015.63 = ₱10,609.37
 
 ---
 

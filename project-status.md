@@ -44,8 +44,8 @@ New models added to the existing schema:
 ### Payroll Engine
 - `calculatePayroll()` in `src/lib/ahop.ts` — unchanged, used both server-side (run payroll) and client-side (live preview)
 - All 26 CSV columns matching the original Excel format
-- SSS brackets, PhilHealth 2.5%, Pag-IBIG ₱200 fixed
-- AHOP top-up, probationary deductions, OT (regular + extended), SIL/SL leave pay
+- SSS brackets, PhilHealth 2.5%, configurable semi-month Pag-IBIG defaulting to ₱100
+- AHOP top-up, OT (regular + extended), SIL/SL leave pay
 - Previous YTD AHOP correctly pulled from last snapshot (bug in original generator fixed)
 - CSV export at `/api/payroll/[periodId]/export`
 

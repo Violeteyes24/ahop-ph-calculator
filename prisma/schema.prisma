@@ -82,7 +82,6 @@ model EmployeeProfile {
   dailyRate                Decimal?
   monthlyRate              Decimal?
   employmentStage          EmploymentStage   @default(PROBATIONARY)
-  probationaryDeductionPct Decimal           @default(0)
   paymentMethod            PaymentMethod     @default(BANK)
   regionCode               String            @default("NCR")
   taxable                  Boolean           @default(false)
@@ -180,7 +179,6 @@ model PayrollSnapshot {
   philHealthEmployer    Decimal  @default(0)
   pagIbigEmployee       Decimal
   pagIbigEmployer       Decimal  @default(0)
-  probationaryDeduction Decimal
   netPay                Decimal
   overtimeRegularHours  Decimal  @default(0)
   overtimeExtendedHours Decimal  @default(0)
@@ -227,8 +225,8 @@ model ContributionRateConfig {
   id                   String    @id @default(cuid())
   name                 String    @default("Handbook v1")
   philHealthRate       Decimal   @default(2.5)
-  pagIbigEmployeeFixed Decimal   @default(200)
-  pagIbigEmployerFixed Decimal   @default(200)
+  pagIbigEmployeeFixed Decimal   @default(100)
+  pagIbigEmployerFixed Decimal   @default(100)
   effectiveFrom        DateTime
   effectiveTo          DateTime?
   createdAt            DateTime  @default(now())

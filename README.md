@@ -10,7 +10,6 @@ Employee-friendly calculator and explainer for Accumulated Holiday and Overtime 
 	- Salary type (daily or monthly)
 	- Daily rate and monthly rate
 	- Working days and baseline days
-	- Probationary deduction percent
 - Outputs include:
 	- Regular pay
 	- AHOP top-up
@@ -100,7 +99,6 @@ npm run dev
 - Monthly Rate: 11000
 - Working Days: 22
 - Baseline Days: 23
-- Probationary Deduction (%): 0
 
 5. Confirm expected outputs:
 - Regular Pay: PHP 11,000.00
@@ -112,15 +110,11 @@ npm run dev
 - AHOP Top-up decreases or becomes zero when regular pay reaches baseline
 - Gross With AHOP adjusts accordingly
 
-7. Set Probationary Deduction (%) to 10 and verify:
-- Probationary Deduction is greater than zero
-- Net Pay decreases
-
-8. Check the handbook fixture table at the bottom:
+7. Check the handbook fixture table at the bottom:
 - Sample rows are visible
 - SSS, PhilHealth, and Pag-IBIG ER/EE columns are present
 
-9. Optional quality checks:
+8. Optional quality checks:
 
 ```bash
 npm run lint

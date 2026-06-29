@@ -47,7 +47,7 @@ export function SettingsForm() {
             type="number"
             step="0.01"
             required
-            defaultValue="200"
+            defaultValue="100"
             className="rounded-lg border border-input px-3 py-2 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
           />
         </div>
@@ -62,7 +62,7 @@ export function SettingsForm() {
             type="number"
             step="0.01"
             required
-            defaultValue="200"
+            defaultValue="100"
             className="rounded-lg border border-input px-3 py-2 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
           />
         </div>

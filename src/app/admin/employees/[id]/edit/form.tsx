@@ -16,7 +16,6 @@ interface Defaults {
   dailyRate: string;
   monthlyRate: string;
   employmentStage: string;
-  probationaryDeductionPct: string;
   paymentMethod: string;
   deminimisAmount: string;
 }

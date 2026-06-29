@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { saveAttendanceAction, runPayrollAction } from "@/app/actions/payroll";
 import { PrintButton } from "@/components/payroll/print-button";
 import { TemplatePayslip } from "@/components/payroll/template-payslip";
-import { calculatePayroll, type PayrollResult } from "@/lib/ahop";
+import { calculatePayroll, type ContributionRateInputs, type PayrollResult } from "@/lib/ahop";
 
 interface EntryRow {
   id: string;
@@ -18,7 +18,6 @@ interface EntryRow {
   salaryCategory: string;
   dailyRate: number;
   monthlyRate: number;
-  probationaryDeductionPct: number;
   taxable: boolean;
   deminimisAmount: number;
   workingDays: number;
@@ -149,6 +148,7 @@ export function AttendanceGrid({
   periodStart,
   periodEnd,
   baselineDays,
+  contributionRates,
   entries: initialEntries,
 }: {
   periodId: string;
@@ -156,6 +156,7 @@ export function AttendanceGrid({
   periodStart: string;
   periodEnd: string;
   baselineDays: number;
+  contributionRates: ContributionRateInputs;
   entries: EntryRow[];
 }) {
   const [entries, setEntries] = useState<EntryRow[]>(initialEntries);
@@ -179,7 +180,6 @@ export function AttendanceGrid({
       workingDays: entry.workingDays,
       workedHours: entry.workedHours,
       baselineDays,
-      probationaryDeductionPct: entry.probationaryDeductionPct,
       taxable: entry.taxable,
       deMinimisPay: entry.deminimisAmount / 2,
       expectedWorkHours: entry.expectedWorkHours,
@@ -207,6 +207,7 @@ export function AttendanceGrid({
       withholdingTax: entry.withholdingTax,
       loanDeductions: entry.loanDeductions,
       salaryAdjustments: entry.salaryAdjustments,
+      contributionRates,
     });
   }
 
@@ -274,7 +275,6 @@ export function AttendanceGrid({
           preview.sssEmployee +
           preview.philHealthEmployee +
           preview.pagIbigEmployee +
-          preview.probationaryDeduction +
           preview.withholdingTax +
           preview.loanDeductions,
       };
@@ -349,6 +349,9 @@ export function AttendanceGrid({
               position: selectedEntry.position || null,
               dateStarted: selectedEntry.dateStarted,
               salaryType: selectedEntry.salaryType,
+              dailyRate: selectedEntry.dailyRate,
+              monthlyRate: selectedEntry.monthlyRate,
+              taxable: selectedEntry.taxable,
               paymentMethod: selectedEntry.paymentMethod,
               employmentStage: selectedEntry.employmentStage,
               deminimisAmount: selectedEntry.deminimisAmount,
@@ -357,6 +360,7 @@ export function AttendanceGrid({
               periodStart,
               periodEnd,
               workingDays: selectedEntry.workingDays,
+              baselineDays,
               regularPay: selectedPreview.regularPay,
               ahopTopup: selectedPreview.ahopTopup,
               grossWithAhop: selectedPreview.grossWithAhop,
@@ -367,7 +371,6 @@ export function AttendanceGrid({
               philHealthEmployer: selectedPreview.philHealthEmployer,
               pagIbigEmployee: selectedPreview.pagIbigEmployee,
               pagIbigEmployer: selectedPreview.pagIbigEmployer,
-              probationaryDeduction: selectedPreview.probationaryDeduction,
               netPay: selectedPreview.netPay,
               overtimeRegularHours: selectedEntry.overtimeRegularHours,
               overtimeExtendedHours: selectedEntry.overtimeExtendedHours,

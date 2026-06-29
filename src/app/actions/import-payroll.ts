@@ -217,7 +217,6 @@ export async function confirmPayrollImportAction(batchId: string, formData: Form
             data: {
               ...employeeData,
               employmentStage: "PROBATIONARY",
-              probationaryDeductionPct: 0,
             },
           });
 

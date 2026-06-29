@@ -137,9 +137,7 @@ export default async function PayrollResultsPage({
             {snapshots.map((snap) => {
               const otPay = Number(snap.otTotalPay || 0);
               const leavesPay = Number(snap.totalLeavesPay || 0);
-              const otherDed =
-                Number(snap.probationaryDeduction) +
-                Number(snap.loanDeductions);
+              const otherDed = Number(snap.loanDeductions);
               return (
                 <tr key={snap.id} className="hover:bg-muted/70">
                   <td className="px-3 py-2">

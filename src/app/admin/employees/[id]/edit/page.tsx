@@ -25,7 +25,6 @@ export default async function EditEmployeePage({
     dailyRate: employee.dailyRate ? String(employee.dailyRate) : "",
     monthlyRate: employee.monthlyRate ? String(employee.monthlyRate) : "",
     employmentStage: employee.employmentStage,
-    probationaryDeductionPct: String(employee.probationaryDeductionPct),
     paymentMethod: employee.paymentMethod,
     deminimisAmount: String(employee.deminimisAmount),
   };

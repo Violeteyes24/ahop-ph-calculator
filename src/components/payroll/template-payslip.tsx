@@ -7,6 +7,9 @@ export interface TemplatePayslipEmployee {
   position: string | null;
   dateStarted: Date | string;
   salaryType: string;
+  dailyRate?: MoneyLike;
+  monthlyRate?: MoneyLike;
+  taxable?: boolean;
   paymentMethod: string;
   employmentStage?: string;
   deminimisAmount: MoneyLike;
@@ -27,7 +30,6 @@ export interface TemplatePayslipSnapshot {
   philHealthEmployer?: MoneyLike;
   pagIbigEmployee: MoneyLike;
   pagIbigEmployer?: MoneyLike;
-  probationaryDeduction?: MoneyLike;
   netPay: MoneyLike;
   overtimeRegularHours: MoneyLike;
   overtimeExtendedHours: MoneyLike;
@@ -128,7 +130,6 @@ function PayslipCopy({
   derived: ReturnType<typeof getPayslipDerivedValues>;
 }) {
   const salaryAdjustments = amount(snapshot.salaryAdjustments);
-  const probationaryDeduction = amount(snapshot.probationaryDeduction);
 
   return (
     <section className="payslip-sheet bg-card p-4 text-[11px] leading-tight text-foreground">
@@ -164,7 +165,7 @@ function PayslipCopy({
           {derived.deMinimisBiMonthly > 0 ? (
             <Line label="De Minimis (Rice, uniform, transport, etc)" quantity="" value={toPeso(derived.deMinimisBiMonthly)} />
           ) : null}
-          <Line label="Tardiness/Undertime" quantity="" value={toPeso(derived.tardinessAmount)} />
+          <Line label="Tardiness/Undertime" quantity={formatQty(amount(snapshot.tardinessMinutes))} value={toPeso(derived.tardinessAmount)} />
           <Line label="Extra OT" quantity={`${formatQty(derived.otHours)} hrs`} value={toPeso(derived.otPay)} />
           {salaryAdjustments !== 0 ? (
             <Line label="Salary adjustments/SIL Conversion" quantity="" value={toPeso(salaryAdjustments)} />
@@ -173,11 +174,19 @@ function PayslipCopy({
         </TableBlock>
 
         <TableBlock title="AHOP">
-          <Line label="Overtime %" quantity="" value={toPeso(snapshot.extraOtPremium)} />
-          <Line label="Overtime" quantity={formatQty(amount(snapshot.aotMinutes))} value={toPeso(snapshot.aotPay)} />
-          <Line label="Holiday" quantity="" value={toPeso(snapshot.totalHolidayPay)} />
-          <Line label="Extra" quantity="" value={toPeso(snapshot.coAhop)} />
+          <Line label="AHOP target pay" quantity={derived.ahopTargetQuantity} value={toPeso(derived.ahopTargetPay)} />
+          <Line label="Basic daily pay" quantity={`${snapshot.workingDays} days`} value={toPeso(derived.scheduledDailyPay)} />
+          <Line label="AHOP gap before holiday/OT" quantity="" value={toPeso(derived.ahopGapBeforeHolidayOt)} />
+          <Line label="AOT" quantity={formatQty(amount(snapshot.aotMinutes))} value={toPeso(snapshot.aotPay)} />
+          <Line label="OT premium" quantity="" value={toPeso(snapshot.extraOtPremium)} />
+          <Line label="Regular holiday pay" quantity={formatQty(amount(snapshot.regularHolidayHours))} value={toPeso(snapshot.regularHolidayPay)} />
+          <Line label="Special holiday pay" quantity={formatQty(amount(snapshot.specialHolidayHours))} value={toPeso(snapshot.specialHolidayPay)} />
+          <Line label="CO AHOP / remaining AHOP" quantity="" value={toPeso(snapshot.coAhop)} />
+          <Line label="Total AHOP this period" quantity="" value={toPeso(derived.totalAhopThisPeriod)} strong />
           <Line label="YTD AHOP" quantity="" value={toPeso(snapshot.ytdAhop)} strong />
+          <p className="border-t border-border px-2 py-1 text-[9px] leading-snug text-muted-foreground">
+            AHOP bridges daily pay toward the 23-day target. Holiday and OT-related amounts are shown separately so the remaining AHOP balance is clear.
+          </p>
         </TableBlock>
 
         <TableBlock title="Deductions">
@@ -186,9 +195,6 @@ function PayslipCopy({
           <Line label="Pagibig" quantity="" value={toPeso(snapshot.pagIbigEmployee)} />
           <Line label="W/Holding Tax" quantity="" value={toPeso(snapshot.withholdingTax)} />
           <Line label="Loans" quantity="" value={toPeso(snapshot.loanDeductions)} />
-          {probationaryDeduction > 0 ? (
-            <Line label="Probationary deduction" quantity="" value={toPeso(probationaryDeduction)} />
-          ) : null}
           <Line label="Total Deductions" quantity="" value={toPeso(derived.totalDeductions)} strong />
         </TableBlock>
       </div>
@@ -220,13 +226,27 @@ function getPayslipDerivedValues(employee: TemplatePayslipEmployee, snapshot: Te
   const otHours = amount(snapshot.otTotalHours) || amount(snapshot.overtimeRegularHours) + amount(snapshot.overtimeExtendedHours);
   const otPay = amount(snapshot.otTotalPay) || amount(snapshot.overtimeRegularPay) + amount(snapshot.overtimeExtendedPay);
   const grossIncome = amount(snapshot.grossWithAhop);
+  const dailyRate = amount(employee.dailyRate);
+  const baselineDays = amount(snapshot.baselineDays);
+  const isTaxableTemplate = employee.salaryType === "DAILY" && (employee.taxable || snapshotDeMinimis > 0);
+  const targetDays = isTaxableTemplate ? baselineDays / 2 : baselineDays;
+  const scheduledDailyPay = isTaxableTemplate
+    ? amount(snapshot.regularPay) + (snapshotDeMinimis || deMinimisBiMonthly)
+    : amount(snapshot.regularPay);
+  const totalAhopThisPeriod = amount(snapshot.totalAhop) || amount(snapshot.ahopTopup);
+  const ahopTargetPay =
+    dailyRate > 0 && targetDays > 0
+      ? dailyRate * targetDays
+      : amount(snapshot.regularPay) + amount(snapshot.ahopTopup);
+  const ahopTargetQuantity =
+    dailyRate > 0 && targetDays > 0 ? `${formatQty(targetDays)} x ${toPeso(dailyRate)}` : "";
+  const ahopGapBeforeHolidayOt = ahopTargetPay - scheduledDailyPay;
   const totalDeductions =
     amount(snapshot.sssEmployee) +
     amount(snapshot.philHealthEmployee) +
     amount(snapshot.pagIbigEmployee) +
     amount(snapshot.withholdingTax) +
-    amount(snapshot.loanDeductions) +
-    amount(snapshot.probationaryDeduction);
+    amount(snapshot.loanDeductions);
   const netPay = grossIncome + amount(snapshot.salaryAdjustments) - totalDeductions;
 
   return {
@@ -239,6 +259,11 @@ function getPayslipDerivedValues(employee: TemplatePayslipEmployee, snapshot: Te
     otHours,
     otPay,
     grossIncome,
+    scheduledDailyPay,
+    ahopTargetPay,
+    ahopTargetQuantity,
+    ahopGapBeforeHolidayOt,
+    totalAhopThisPeriod,
     totalDeductions,
     netPay,
   };
