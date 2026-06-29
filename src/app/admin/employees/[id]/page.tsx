@@ -94,10 +94,6 @@ export default async function EmployeeViewPage({
               label="Monthly rate"
               value={employee.monthlyRate ? toPeso(employee.monthlyRate) : "—"}
             />
-            <Row
-              label="Probationary deduction"
-              value={`${Number(employee.probationaryDeductionPct)}%`}
-            />
             <Row label="Payment method" value={employee.paymentMethod} />
             <Row label="De Minimis" value={toPeso(employee.deminimisAmount)} />
           </dl>

@@ -58,8 +58,8 @@ async function main() {
       data: {
         name: "Handbook v1",
         philHealthRate: 2.5,
-        pagIbigEmployeeFixed: 200,
-        pagIbigEmployerFixed: 200,
+        pagIbigEmployeeFixed: 100,
+        pagIbigEmployerFixed: 100,
         effectiveFrom: new Date("2024-01-01"),
       },
     });

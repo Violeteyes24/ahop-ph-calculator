@@ -29,7 +29,6 @@ Parses Excel payroll source data and maps it to structured TypeScript objects.
   monthlyRate: number
   workingDays: number
   baselineDays: number
-  probationaryDeductionPct: number
   // NEW:
   overtimeRegularHours?: number      // RD OT (1x rate)
   overtimeExtendedHours?: number     // Extended OT (1.3x rate)
@@ -55,7 +54,6 @@ Parses Excel payroll source data and maps it to structured TypeScript objects.
 5. Deductions from gross:
    - Absences: hours × (daily rate / 8) [negative]
    - SSS, Philhealth, Pag-ibig (based on contribution brackets)
-   - Probationary deduction
    - Tardiness/undertime
    - Loan deductions
 6. **YTD AHOP Tracking:** cumulative AHOP across periods
@@ -294,4 +292,3 @@ This will:
 3. **Build UI:** Create React components for upload and display
 4. **Database migration:** When DB is available, run Prisma migration to apply schema changes
 5. **Payslip design:** Design payslip layout matching Apnea Dynamics branding
-

@@ -7,7 +7,6 @@ export interface PayrollInputs {
   workingDays: number;
   workedHours?: number;
   baselineDays: number;
-  probationaryDeductionPct: number;
   taxable?: boolean;
   deMinimisPay?: number;
   expectedWorkHours?: number;
@@ -66,7 +65,6 @@ export interface PayrollResult {
   philHealthEmployer: number;
   pagIbigEmployee: number;
   pagIbigEmployer: number;
-  probationaryDeduction: number;
   tardinessMinutes: number;
   tardinessDeduction: number;
   aotMinutes: number;
@@ -95,6 +93,7 @@ interface SssBracket {
 }
 
 const SSS_BRACKETS: SssBracket[] = [
+  { maxGross: 11250, employee: 550, employer: 1110 },
   { maxGross: 11500, employee: 575, employer: 1160 },
   { maxGross: 12650, employee: 625, employer: 1260 },
   { maxGross: 13800, employee: 700, employer: 1410 },
@@ -172,10 +171,11 @@ export function calculatePayroll(input: PayrollInputs): PayrollResult {
   const safeWorkingDays = Math.max(0, Math.floor(input.workingDays || 0));
   const safeWorkedHours = Math.max(0, input.workedHours || safeWorkingDays * 8);
   const safeBaselineDays = Math.max(1, Math.floor(input.baselineDays || 23));
-  const safeProbationPct = Math.max(0, input.probationaryDeductionPct || 0);
 
   const safeDeMinimisPay = Math.max(0, input.deMinimisPay || 0);
   const safeExpectedWorkHoursPay = Math.max(0, input.expectedWorkHoursPay || 0);
+  const safeScheduledWorkDays = Math.max(0, input.scheduledWorkDays || 0);
+  const safeScheduledWorkDaysPay = Math.max(0, input.scheduledWorkDaysPay || 0);
   const safeOTRegularHours = Math.max(0, input.overtimeRegularHours || 0);
   const safeOTExtendedHours = Math.max(0, input.overtimeExtendedHours || 0);
   const safeSilDays = Math.max(0, input.silDays || 0);
@@ -215,9 +215,19 @@ export function calculatePayroll(input: PayrollInputs): PayrollResult {
   const inferredMonthlyRateFromDaily = round2(safeDailyRate * safeBaselineDays);
   const effectiveMonthlyRate = safeMonthlyRate > 0 ? safeMonthlyRate : inferredMonthlyRateFromDaily;
   const halfMonthlyRate = round2(effectiveMonthlyRate / 2);
+  const isTaxableAhopTemplate = isTemplateMode && input.salaryType === "DAILY" && (input.taxable ?? false);
+  const semiMonthlyTargetPay = round2((safeDailyRate * safeBaselineDays) / 2);
+  const scheduledGrossPay =
+    safeScheduledWorkDays > 0
+      ? round2(safeScheduledWorkDays * safeDailyRate)
+      : safeScheduledWorkDaysPay > 0
+      ? safeScheduledWorkDaysPay
+      : safeExpectedWorkHoursPay;
 
   const regularPay = isTemplateMode
-    ? input.taxable
+    ? isTaxableAhopTemplate
+      ? round2(Math.max(0, scheduledGrossPay - safeDeMinimisPay))
+      : input.taxable
       ? round2(halfMonthlyRate - safeDeMinimisPay)
       : round2((safeWorkedHours / 8) * safeDailyRate)
     : input.salaryType === "DAILY"
@@ -227,7 +237,9 @@ export function calculatePayroll(input: PayrollInputs): PayrollResult {
   // AHOP calculation (only for DAILY salary type)
   const ahopDays = input.salaryType === "DAILY" ? Math.max(0, safeBaselineDays - safeWorkingDays) : 0;
   const expectedAhop =
-    isTemplateMode && input.salaryType === "DAILY"
+    isTaxableAhopTemplate
+      ? round2(semiMonthlyTargetPay - scheduledGrossPay)
+      : isTemplateMode && input.salaryType === "DAILY"
       ? round2(Math.max(0, halfMonthlyRate - safeExpectedWorkHoursPay))
       : 0;
 
@@ -244,9 +256,20 @@ export function calculatePayroll(input: PayrollInputs): PayrollResult {
   const totalLeaves = round2(safeSilDays + safeSlHours / 8);
   const totalLeavesPay = round2(silPay + slPay);
   const absencePay = round2(safeAbsenceHours * hourlyRate);
-  const absenceDeduction = round2(input.absenceDeduction ?? -absencePay);
+  const templateAbsenceDeductionAmount = round2(
+    input.absenceDeduction !== undefined
+      ? Math.abs(input.absenceDeduction)
+      : safeAbsenceHours > 0
+      ? (safeAbsenceHours / 8) * safeDailyRate
+      : absencePay
+  );
+  const absenceDeduction = round2(input.absenceDeduction ?? -templateAbsenceDeductionAmount);
   const tardinessDeductionForNet = round2(
-    input.tardinessDeduction !== undefined ? Math.abs(input.tardinessDeduction) : safeTardinessDeduction
+    input.tardinessDeduction !== undefined
+      ? Math.abs(input.tardinessDeduction)
+      : safeTardinessMinutes > 0
+      ? safeTardinessMinutes * (hourlyRate / 60)
+      : safeTardinessDeduction
   );
 
   const aotPay = round2(input.aotPay ?? safeAotMinutes * (hourlyRate / 60));
@@ -258,7 +281,9 @@ export function calculatePayroll(input: PayrollInputs): PayrollResult {
   const totalHolidayPay = round2(input.totalHolidayPay ?? regularHolidayPay + specialHolidayPay);
   const coAhop = round2(
     input.coAhop ??
-      (input.salaryType === "DAILY"
+      (isTaxableAhopTemplate
+        ? expectedAhop - aotPay - extraOtPremium - regularHolidayPay - specialHolidayPay
+        : input.salaryType === "DAILY"
         ? Math.max(0, halfMonthlyRate - safeExpectedWorkHoursPay - aotPay - extraOtPremium - totalHolidayPay)
         : 0)
   );
@@ -271,25 +296,37 @@ export function calculatePayroll(input: PayrollInputs): PayrollResult {
 
   // Total gross (base + OT + leaves)
   const grossWithAhop = isTemplateMode
-    ? round2(safeDeMinimisPay + regularPay + expectedAhop + otTotalPay + totalLeavesPay - tardinessDeductionForNet)
+    ? isTaxableAhopTemplate
+      ? round2(
+          regularPay +
+            safeDeMinimisPay -
+            templateAbsenceDeductionAmount -
+            tardinessDeductionForNet +
+            totalAhop +
+            otTotalPay +
+            totalLeavesPay
+        )
+      : round2(safeDeMinimisPay + regularPay + expectedAhop + otTotalPay + totalLeavesPay - tardinessDeductionForNet)
     : round2(
         regularPay + ahopTopup + overtimeRegularPay + overtimeExtendedPay + silPay + slPay - absencePay
       );
 
   // YTD AHOP tracking
-  const ytdAhop = round2(safePreviousYtdAhop + (isTemplateMode ? coAhop : ahopTopup));
+  const ytdAhop = round2(safePreviousYtdAhop + (isTemplateMode ? totalAhop : ahopTopup));
 
-  const sss = getSss(grossWithAhop);
-  const philHealthEmployee = round2(grossWithAhop * philHealthRate);
-  const philHealthEmployer = round2(grossWithAhop * philHealthRate);
-
-  const probationaryDeduction = round2(grossWithAhop * (safeProbationPct / 100));
+  const contributionBase = isTaxableAhopTemplate ? semiMonthlyTargetPay : grossWithAhop;
+  const sss = getSss(contributionBase);
+  const philHealthEmployee = isTaxableAhopTemplate
+    ? contributionBase * philHealthRate
+    : round2(contributionBase * philHealthRate);
+  const philHealthEmployer = isTaxableAhopTemplate
+    ? contributionBase * philHealthRate
+    : round2(contributionBase * philHealthRate);
 
   const employeeTotalDeductions =
     sss.employee +
     philHealthEmployee +
     pagIbigEmployeeFixed +
-    probationaryDeduction +
     (isTemplateMode ? safeWithholdingTax : safeTardinessDeduction) +
     safeLoanDeductions;
 
@@ -326,7 +363,6 @@ export function calculatePayroll(input: PayrollInputs): PayrollResult {
     philHealthEmployer,
     pagIbigEmployee: pagIbigEmployeeFixed,
     pagIbigEmployer: pagIbigEmployerFixed,
-    probationaryDeduction,
     tardinessMinutes: safeTardinessMinutes,
     tardinessDeduction: tardinessDeductionForNet,
     aotMinutes: safeAotMinutes,

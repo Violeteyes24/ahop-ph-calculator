@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { AttendanceGrid } from "./attendance-grid";
+import { getContributionRatesForPeriod } from "@/lib/contribution-rates";
 
 function toDateLabel(value: Date | string): string {
   return new Intl.DateTimeFormat("en-PH", {
@@ -34,7 +35,6 @@ export default async function AttendancePeriodPage({
               salaryCategory: true,
               dailyRate: true,
               monthlyRate: true,
-              probationaryDeductionPct: true,
               taxable: true,
               paymentMethod: true,
               employmentStage: true,
@@ -47,6 +47,7 @@ export default async function AttendancePeriodPage({
   });
 
   if (!period) notFound();
+  const contributionRates = await getContributionRatesForPeriod(period.periodStart, period.periodEnd);
 
   if (period.status === "COMPLETED") {
     return (
@@ -74,7 +75,6 @@ export default async function AttendancePeriodPage({
     salaryCategory: entry.employee.salaryCategory,
     dailyRate: Number(entry.employee.dailyRate ?? 0),
     monthlyRate: Number(entry.employee.monthlyRate ?? 0),
-    probationaryDeductionPct: Number(entry.employee.probationaryDeductionPct),
     taxable: entry.employee.taxable,
     deminimisAmount: Number(entry.employee.deminimisAmount),
     workingDays: entry.workingDays,
@@ -135,6 +135,7 @@ export default async function AttendancePeriodPage({
         periodStart={period.periodStart.toISOString()}
         periodEnd={period.periodEnd.toISOString()}
         baselineDays={period.baselineDays}
+        contributionRates={contributionRates}
         entries={entries}
       />
     </div>

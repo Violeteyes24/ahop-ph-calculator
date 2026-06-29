@@ -308,7 +308,6 @@ export function excelEmployeeToPayrollInput(employee: ExcelEmployeeRow) {
     workingDays: Math.floor(employee.workedDays),
     workedHours: employee.workedHours,
     baselineDays: 23, // Default baseline
-    probationaryDeductionPct: 0, // Will need to determine from employee profile
     taxable: employee.taxable.toLowerCase() === "yes",
     deMinimisPay: employee.deMinimisBiMonthly,
     expectedWorkHours: employee.expectedWorkHours,

@@ -123,7 +123,6 @@ export default function Home() {
   const [monthlyRate, setMonthlyRate] = useState(11000);
   const [workingDays, setWorkingDays] = useState(22);
   const [baselineDays, setBaselineDays] = useState(23);
-  const [probationaryDeductionPct, setProbationaryDeductionPct] = useState(0);
   const [isTutorialOpen, setIsTutorialOpen] = useState(false);
   const [isFormulaTutorialOpen, setIsFormulaTutorialOpen] = useState(false);
   const [formulaStepIndex, setFormulaStepIndex] = useState(0);
@@ -136,9 +135,8 @@ export default function Home() {
         monthlyRate,
         workingDays,
         baselineDays,
-        probationaryDeductionPct,
       }),
-    [salaryType, dailyRate, monthlyRate, workingDays, baselineDays, probationaryDeductionPct],
+    [salaryType, dailyRate, monthlyRate, workingDays, baselineDays],
   );
 
   const tutorialSteps: TutorialStep[] = [
@@ -175,7 +173,7 @@ export default function Home() {
     },
     {
       term: "Deductions",
-      meaning: "Amounts removed from gross pay such as SSS, PhilHealth, Pag-IBIG, and probationary deductions.",
+      meaning: "Amounts removed from gross pay such as SSS, PhilHealth, and Pag-IBIG.",
       icon: "deductions",
     },
     {
@@ -187,7 +185,7 @@ export default function Home() {
 
   const ahopDays = salaryType === "DAILY" ? Math.max(0, baselineDays - workingDays) : 0;
   const totalEmployeeDeductions =
-    result.sssEmployee + result.philHealthEmployee + result.pagIbigEmployee + result.probationaryDeduction;
+    result.sssEmployee + result.philHealthEmployee + result.pagIbigEmployee;
 
   const teachingSummary =
     result.ahopTopup > 0
@@ -200,7 +198,6 @@ export default function Home() {
     monthlyRate: 11000,
     workingDays: 22,
     baselineDays: 23,
-    probationaryDeductionPct: 0,
   });
 
   const formulaSlides: FormulaSlide[] = [
@@ -237,11 +234,11 @@ export default function Home() {
     {
       id: "formula-4",
       title: "Take-home pay",
-      formula: "Net Pay = Gross With AHOP - (SSS EE + PhilHealth EE + Pag-IBIG EE + Probationary Deduction)",
+      formula: "Net Pay = Gross With AHOP - (SSS EE + PhilHealth EE + Pag-IBIG EE)",
       explanation: "Take-home pay is what is left after required deductions.",
       exampleLines: [
         `Sample deductions: SSS ${toPeso(sampleFormulaResult.sssEmployee)}, PhilHealth ${toPeso(sampleFormulaResult.philHealthEmployee)}, Pag-IBIG ${toPeso(sampleFormulaResult.pagIbigEmployee)}.`,
-        `${toPeso(sampleFormulaResult.grossWithAhop)} - (${toPeso(sampleFormulaResult.sssEmployee)} + ${toPeso(sampleFormulaResult.philHealthEmployee)} + ${toPeso(sampleFormulaResult.pagIbigEmployee)} + ${toPeso(sampleFormulaResult.probationaryDeduction)}) = ${toPeso(sampleFormulaResult.netPay)}`,
+        `${toPeso(sampleFormulaResult.grossWithAhop)} - (${toPeso(sampleFormulaResult.sssEmployee)} + ${toPeso(sampleFormulaResult.philHealthEmployee)} + ${toPeso(sampleFormulaResult.pagIbigEmployee)}) = ${toPeso(sampleFormulaResult.netPay)}`,
       ],
     },
   ];
@@ -292,7 +289,6 @@ export default function Home() {
     setMonthlyRate(11000);
     setWorkingDays(22);
     setBaselineDays(23);
-    setProbationaryDeductionPct(0);
     setIsTutorialOpen(false);
     setIsFormulaTutorialOpen(false);
   }
@@ -345,7 +341,7 @@ export default function Home() {
         <Card className="surface">
           <CardHeader>
             <CardTitle>Employee Inputs</CardTitle>
-            <CardDescription>Date started, pay basis, and probationary deductions.</CardDescription>
+            <CardDescription>Date started, pay basis, and current-period work days.</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid gap-3 sm:grid-cols-2">
@@ -422,16 +418,6 @@ export default function Home() {
                 />
               </div>
 
-              <div className="sm:col-span-2 grid gap-1.5">
-                <Label htmlFor="probation-pct">Probationary Deduction (%)</Label>
-                <Input
-                  id="probation-pct"
-                  type="number"
-                  step="0.01"
-                  value={probationaryDeductionPct}
-                  onChange={(e) => setProbationaryDeductionPct(Number(e.target.value) || 0)}
-                />
-              </div>
             </div>
             <p className="caption mt-4 text-xs">
               Notes: Pay schedule follows handbook windows: 26th-10th paid on 15th, 11th-25th paid on last day of month.
@@ -466,7 +452,6 @@ export default function Home() {
               <div className="flex items-center justify-between"><span>SSS (EE)</span><span>{toPeso(result.sssEmployee)}</span></div>
               <div className="flex items-center justify-between"><span>PhilHealth (EE)</span><span>{toPeso(result.philHealthEmployee)}</span></div>
               <div className="flex items-center justify-between"><span>Pag-IBIG (EE)</span><span>{toPeso(result.pagIbigEmployee)}</span></div>
-              <div className="flex items-center justify-between"><span>Probationary Deduction</span><span>{toPeso(result.probationaryDeduction)}</span></div>
               <Separator className="my-1" />
               <div className="flex items-center justify-between text-base font-semibold">
                 <span>Net Pay</span>
